@@ -3,12 +3,15 @@ import netCDF4
 
 class Sidecar:
     
-    def __init__(self, granule_path):
-        self.file_path = self.name_from_granule(granule_path)
+    def __init__(self, granule_path, out_path):
+        self.file_path = self.name_from_granule(granule_path, out_path)
         self.create()
         
-    def name_from_granule(self, granule_path):
-        return  '.'.join(granule_path.split('.')[0:-1]) + '_stare.nc'
+    def name_from_granule(self, granule_path, out_path):
+        if out_path:
+            return out_path + '.'.join(n.split('/')[-1].split('.')[0:-1]) + '_stare.nc'
+        else:
+            return  '.'.join(granule_path.split('.')[0:-1]) + '_stare.nc'
         
     def create(self):
         with netCDF4.Dataset(self.file_path, "w", format="NETCDF4") as rootgrp:
