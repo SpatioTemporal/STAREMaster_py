@@ -2,6 +2,7 @@
 
 import argparse
 import products
+import glob
 
 
 def create_sidecar(file_path, workers, product, out_path, cover_res):
@@ -15,6 +16,16 @@ def create_sidecar(file_path, workers, product, out_path, cover_res):
         # Would be nice if we would a) catch this in main and b) if we could list the modules in products
         print('product not supported')
         quit()
+        
+def list_graunles(folder, product):    
+    if product in ['MOD09', 'MOD05']:
+        extension = 'hdf'
+    elif product in ['VNP03DNB']:
+        extension = 'nc'
+        
+    search_term = '{folder}{sep}{trunk}*.{extension}'
+    search_term = search_term.format(folder=folder, sep='/', trunk=product, extension=extension)
+    return glob.glob(search_term)
 
 
 def guess_product(file_path):
@@ -53,9 +64,10 @@ if __name__ == '__main__':
     parser.set_defaults(overwrite=True)        
     args = parser.parse_args()
 
+    product = None
     if args.product is not None:
         product = args.product
-    else:
+    elif args.file:
         product = guess_product(args.file)
         print('Product not specified. Guessing it is {product}'.format(product=product))
     
@@ -75,6 +87,17 @@ if __name__ == '__main__':
                        product=product,
                        out_path=args.out_path,
                        cover_res=args.cover_res)
+    elif args.folder:
+        file_paths = list_graunles(args.folder, product=product)
+        for file_path in file_paths:
+            create_sidecar(file_path=file_path,
+                           workers=args.workers,
+                           product=product,
+                           out_path=args.out_path,
+                           cover_res=args.cover_res)
+        
+        
+    
         
         
         
