@@ -17,6 +17,19 @@ def create_sidecar(file_path, workers, product, out_path, cover_res):
         quit()
 
 
+def guess_product(file_path):
+    file_name = file_path.split('/')[-1]
+    if ('MOD05_L2' in file_path and '.hdf' in file_name):
+        product = 'MOD05'
+    elif ('MOD09.' in file_path and '.hdf' in file_name):
+        product = 'MOD09'
+    elif ('VNP03DNB.' in file_path and '.nc' in file_name):
+        product = 'VNP03DNB'
+    else:
+        product = None
+    return product
+        
+        
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Creates Sidecar Files')
     parser.add_argument('--folder', metavar='folder', nargs='?', type=str, 
@@ -38,10 +51,16 @@ if __name__ == '__main__':
     
     parser.set_defaults(catalogue=False)    
     parser.set_defaults(overwrite=True)        
-    args = parser.parse_args()   
+    args = parser.parse_args()
 
-    if args.product is None:
-        print('Wrong usage; need to specify the product \n')
+    if args.product is not None:
+        product = args.product
+    else:
+        product = guess_product(args.file)
+        print('Product not specified. Guessing it is {product}'.format(product=product))
+    
+    if product is None:
+        print('Product not specified and could not guess from file name')
         print(parser.print_help())
         quit()   
     
@@ -53,7 +72,7 @@ if __name__ == '__main__':
     if args.file:
         create_sidecar(file_path=args.file, 
                        workers=args.workers, 
-                       product=args.product,
+                       product=product,
                        out_path=args.out_path,
                        cover_res=args.cover_res)
         
