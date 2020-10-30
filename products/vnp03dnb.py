@@ -22,3 +22,5 @@ class VNP03DNB:
         self.gring_lons = self.netcdf.GRingPointLongitude[::-1]
          
 
+
+

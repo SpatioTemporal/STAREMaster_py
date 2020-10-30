@@ -34,9 +34,10 @@ class Sidecar:
         j_name = 'j_'.format(nom_res)        
         with netCDF4.Dataset(self.file_path , 'a', format="NETCDF4") as rootgrp:
             lons_netcdf = rootgrp.createVariable(varname=varname, 
-                                                 datatype='f8', 
+                                                 datatype='f4', 
                                                  dimensions=(i_name, j_name),
-                                                 chunksizes=[i, j])
+                                                 chunksizes=[i, j],
+                                                 zlib=True)
             lons_netcdf.long_name = 'latitude'
             lons_netcdf.units = 'degrees_east'
             lons_netcdf[:, :] = lons
@@ -49,9 +50,10 @@ class Sidecar:
         j_name = 'j_'.format(nom_res)        
         with netCDF4.Dataset(self.file_path , 'a', format="NETCDF4") as rootgrp:
             lats_netcdf = rootgrp.createVariable(varname=varname, 
-                                                 datatype='f8', 
+                                                 datatype='f4', 
                                                  dimensions=(i_name, j_name),
-                                                 chunksizes=[i, j])
+                                                 chunksizes=[i, j],
+                                                 zlib=True)
             lats_netcdf.long_name = 'latitude'
             lats_netcdf.units = 'degrees_north'
             lats_netcdf[:, :] = lats
@@ -66,7 +68,8 @@ class Sidecar:
             sids_netcdf = rootgrp.createVariable(varname=varname, 
                                          datatype='u8', 
                                          dimensions=(i_name, j_name),
-                                         chunksizes=[i, j])
+                                         chunksizes=[i, j],
+                                         zlib=True)
             sids_netcdf.long_name = 'SpatioTemporal Adaptive Resolution Encoding (STARE) index'
             sids_netcdf[:, :] = sids
 
@@ -79,6 +82,7 @@ class Sidecar:
             cover_netcdf = rootgrp.createVariable(varname=varname, 
                                                   datatype='u8', 
                                                   dimensions=(l_name),
-                                                  chunksizes=[l])
+                                                  chunksizes=[l],
+                                                  zlib=True)
             cover_netcdf.long_name = 'SpatioTemporal Adaptive Resolution Encoding (STARE) cover'
  

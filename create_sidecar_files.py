@@ -9,10 +9,11 @@ import products
 import numpy
 
 
-def latlon2stare(lat, lon, workers):
-    chunk_size = 100
-    lat_x = xarray.DataArray(lat, dims=['x', 'y']).chunk({'x': chunk_size})
-    lon_x = xarray.DataArray(lon, dims=['x', 'y']).chunk({'x': chunk_size})
+def latlon2stare(lats, lons, workers):
+    # should probably make chunk size dependent on the number of workers and lat/lon dimensions
+    chunk_size = 500 
+    lat_x = xarray.DataArray(lats, dims=['x', 'y']).chunk({'x': chunk_size})
+    lon_x = xarray.DataArray(lons, dims=['x', 'y']).chunk({'x': chunk_size})
     if workers:
         with dask.distributed.Client(n_workers=workers) as client:            
             sids = xarray.apply_ufunc(pystare.from_latlon2D,
@@ -23,8 +24,7 @@ def latlon2stare(lat, lon, workers):
                                       output_dtypes=[numpy.int64])
             sids = numpy.array(sids)
     else: 
-        sids = pystare.from_latlon2D(lat_x, lon_x, adapt_resolution=True)
-        
+        sids = pystare.from_latlon2D(lats, lons, adapt_resolution=True)
     return sids
 
 
@@ -37,9 +37,9 @@ def gring2cover(lats, lons, level):
 
 def create_sidecar(file_path, workers, product, out_path, cover_res):
     if product == 'MOD09':
-        create_sidecar_mod09(file_path, workers, out_path)
-    elif product == 'VNP02DNB':
-        create_sidecar_vnp03dnb(file_path, workers, out_path)
+        create_sidecar_mod09(file_path, workers, out_path, cover_res)
+    elif product == 'VNP03DNB':
+        create_sidecar_vnp03dnb(file_path, workers, out_path, cover_res)
     else:        
         print('product not supported')
         quit()
@@ -68,7 +68,7 @@ def create_sidecar_mod09(file_path, workers, out_path, cover_res):
     sidecar.write_cover(cover_sids, nom_res=nom_res)
     
     
-def create_sidecar_vnp03dnb(file_path, workers, out_path):
+def create_sidecar_vnp03dnb(file_path, workers, out_path, cover_res):
     vnp03 = products.VNP03DNB(file_path)
     
     sids = latlon2stare(vnp03.lats, vnp03.lons, workers)
@@ -76,9 +76,9 @@ def create_sidecar_vnp03dnb(file_path, workers, out_path):
     cover_res = int(pystare.spatial_resolution(sids).min())
     cover_sids = gring2cover(vnp03.gring_lats, vnp03.gring_lons, cover_res)
     
-    i = sids.shape[0]
-    j = sids.shape[1]
-    l = cover_sids.size 
+    i = vnp03.lats.shape[0]
+    j = vnp03.lats.shape[1]
+    l = cover_sids.size
     
     sidecar = Sidecar(file_path, out_path)
     nom_res = '750m'
@@ -99,7 +99,7 @@ if __name__ == '__main__':
                         help='the file to create a sidecar for')
     parser.add_argument('--product', metavar='product', nargs='?', type=str, 
                         help='product (e.g. VNP03DNB, MOD09)')
-    parser.add_argument('--cover_res', metavar='cover_res', nargs='?', type=str, 
+    parser.add_argument('--cover_res', metavar='cover_res', nargs='?', type=int, 
                         help='max STARE resolution of the cover. Default: min resolution of iFOVs')    
     parser.add_argument('--workers', metavar='n_workers', nargs='?', type=int, 
                         help='use n_workers (local) dask workers')
@@ -109,7 +109,7 @@ if __name__ == '__main__':
                         help='overwrite sidecar if file with same name exists (default: True)')
     
     parser.set_defaults(catalogue=False)    
-    parser.set_defaults(overwrite=True)    
+    parser.set_defaults(overwrite=True)        
     args = parser.parse_args()   
 
     if args.product is None:
