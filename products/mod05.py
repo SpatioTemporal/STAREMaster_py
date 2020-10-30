@@ -3,30 +3,31 @@ import conversions
 from products.hdfeos import HDFeos
 
 
-class MOD09(HDFeos):
+class MOD05(HDFeos):
     
     def __init__(self, file_path):
-        super(MOD09, self).__init__(file_path)
+        super(MOD05, self).__init__(file_path)
         self.read_laton()
-        self.read_gring()
+        self.read_gring()        
         
     def read_gring(self):
-        core_metadata = self.get_metadata_group('CoreMetadata')    
-        g_points = core_metadata['INVENTORYMETADATA']['SPATIALDOMAINCONTAINER']['HORIZONTALSPATIALDOMAINCONTAINER']['GPOLYGON']['GPOLYGONCONTAINER']['GRINGPOINT']        
+        core_metadata = self.get_metadata_group('ArchiveMetadata')    
+        g_points = core_metadata['ARCHIVEDMETADATA']['GPOLYGON']['GPOLYGONCONTAINER']['GRINGPOINT']        
         lats = g_points['GRINGPOINTLATITUDE']['VALUE']
         lons = g_points['GRINGPOINTLONGITUDE']['VALUE']
         self.gring_lats = list(map(float,lats.strip('()').split(', ')))[::-1]
         self.gring_lons = list(map(float, lons.strip('()').split(', ')))[::-1]
-
+        
 
 def create_sidecar(file_path, workers, out_path, cover_res):
-    nom_res = '1km'
-    granule = MOD09(file_path)    
+    nom_res = '5km'
+    granule = MOD05(file_path)    
     
     sids = conversions.latlon2stare(granule.lats, granule.lons, workers)
     
     if not cover_res:
-        cover_res = conversions.min_level(sids)
+        #cover_res = conversions.min_level(sids)
+        cover_res = conversions.max_level(sids)
         
     cover_sids = conversions.gring2cover(granule.gring_lats, granule.gring_lons, cover_res)
     
@@ -35,6 +36,7 @@ def create_sidecar(file_path, workers, out_path, cover_res):
     l = cover_sids.size 
     
     sidecar = Sidecar(file_path, out_path)
+    
     sidecar.write_dimensions(i, j, l, nom_res=nom_res)    
     sidecar.write_lons(granule.lons, nom_res=nom_res)
     sidecar.write_lats(granule.lats, nom_res=nom_res)

@@ -7,6 +7,8 @@ import products
 def create_sidecar(file_path, workers, product, out_path, cover_res):
     if product == 'MOD09':
         products.mod09.create_sidecar(file_path, workers, out_path, cover_res)
+    elif product == 'MOD05':
+        products.mod05.create_sidecar(file_path, workers, out_path, cover_res)
     elif product == 'VNP03DNB':
         products.vnp03dnb.create_sidecar(file_path, workers, out_path, cover_res)
     else:        

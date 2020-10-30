@@ -36,3 +36,6 @@ def gring2cover(lats, lons, level):
 
 def min_level(sids):
     return int(pystare.spatial_resolution(sids).min())
+
+def max_level(sids):
+    return int(pystare.spatial_resolution(sids).max())
