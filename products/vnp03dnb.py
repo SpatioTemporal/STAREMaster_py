@@ -1,5 +1,7 @@
 import netCDF4
 import numpy
+from sidecar import Sidecar
+import conversions
 
 
 class VNP03DNB:
@@ -22,5 +24,23 @@ class VNP03DNB:
         self.gring_lons = self.netcdf.GRingPointLongitude[::-1]
          
 
-
-
+def create_sidecar(file_path, workers, out_path, cover_res):
+    vnp03 = VNP03DNB(file_path)
+    
+    sids = conversions.latlon2stare(vnp03.lats, vnp03.lons, workers)
+    
+    if not cover_res:
+        cover_res = conversions.min_level(sids)
+    cover_sids = conversions.gring2cover(vnp03.gring_lats, vnp03.gring_lons, cover_res)
+    
+    i = vnp03.lats.shape[0]
+    j = vnp03.lats.shape[1]
+    l = cover_sids.size
+    
+    sidecar = Sidecar(file_path, out_path)
+    nom_res = '750m'
+    sidecar.write_dimensions(i, j, l, nom_res=nom_res)    
+    sidecar.write_lons(vnp03.lons, nom_res=nom_res)
+    sidecar.write_lats(vnp03.lats, nom_res=nom_res)
+    sidecar.write_sids(sids, nom_res=nom_res)
+    sidecar.write_cover(cover_sids, nom_res=nom_res)

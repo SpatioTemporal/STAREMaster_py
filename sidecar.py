@@ -6,6 +6,7 @@ class Sidecar:
     def __init__(self, granule_path, out_path):
         self.file_path = self.name_from_granule(granule_path, out_path)
         self.create()
+        self.zlib = True
         
     def name_from_granule(self, granule_path, out_path):
         if out_path:
@@ -17,7 +18,7 @@ class Sidecar:
         with netCDF4.Dataset(self.file_path, "w", format="NETCDF4") as rootgrp:
             pass
         
-    def write_dimensions(self, i, j, l, nom_res='1km'):
+    def write_dimensions(self, i, j, l, nom_res):
         i_name = 'i_'.format(nom_res)
         j_name = 'j_'.format(nom_res)
         l_name = 'l_'.format(nom_res)
@@ -26,7 +27,7 @@ class Sidecar:
             rootgrp.createDimension(j_name, j)
             rootgrp.createDimension(l_name, l)
 
-    def write_lons(self, lons, nom_res='1km'):
+    def write_lons(self, lons, nom_res):
         i = lons.shape[0]
         j = lons.shape[1]
         varname = 'Longitude_{}'.format(nom_res)
@@ -37,12 +38,12 @@ class Sidecar:
                                                  datatype='f4', 
                                                  dimensions=(i_name, j_name),
                                                  chunksizes=[i, j],
-                                                 zlib=True)
+                                                 zlib=self.zlib)
             lons_netcdf.long_name = 'latitude'
             lons_netcdf.units = 'degrees_east'
             lons_netcdf[:, :] = lons
     
-    def write_lats(self, lats, nom_res='1km'):
+    def write_lats(self, lats, nom_res):
         i = lats.shape[0]
         j = lats.shape[1]
         varname = 'Latitude_{}'.format(nom_res)
@@ -53,12 +54,12 @@ class Sidecar:
                                                  datatype='f4', 
                                                  dimensions=(i_name, j_name),
                                                  chunksizes=[i, j],
-                                                 zlib=True)
+                                                 zlib=self.zlib)
             lats_netcdf.long_name = 'latitude'
             lats_netcdf.units = 'degrees_north'
             lats_netcdf[:, :] = lats
         
-    def write_sids(self, sids, nom_res='1km'):
+    def write_sids(self, sids, nom_res):
         i = sids.shape[0]
         j = sids.shape[1]
         varname = 'STARE_index_{}'.format(nom_res)
@@ -69,12 +70,12 @@ class Sidecar:
                                          datatype='u8', 
                                          dimensions=(i_name, j_name),
                                          chunksizes=[i, j],
-                                         zlib=True)
+                                         zlib=self.zlib)
             sids_netcdf.long_name = 'SpatioTemporal Adaptive Resolution Encoding (STARE) index'
             sids_netcdf[:, :] = sids
 
 
-    def write_cover(self, cover, nom_res='1km'):
+    def write_cover(self, cover, nom_res):
         l = cover.size
         varname = 'STARE_cover_{}'.format(nom_res)
         l_name = 'l_'.format(nom_res)
@@ -83,6 +84,6 @@ class Sidecar:
                                                   datatype='u8', 
                                                   dimensions=(l_name),
                                                   chunksizes=[l],
-                                                  zlib=True)
+                                                  zlib=self.zlib)
             cover_netcdf.long_name = 'SpatioTemporal Adaptive Resolution Encoding (STARE) cover'
  
