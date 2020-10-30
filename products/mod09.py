@@ -1,5 +1,7 @@
 from pyhdf.SD import SD
 import numpy
+from sidecar import Sidecar
+import conversions
 
 
 def parse_hdfeos_metadata(string):
@@ -63,3 +65,24 @@ class MOD09:
         return metadata_group
 
 
+def create_sidecar(file_path, workers, out_path, cover_res):
+    mod09 = MOD09(file_path)    
+    
+    sids = conversions.latlon2stare(mod09.lats, mod09.lons, workers)
+    
+    if not cover_res:
+        cover_res = conversions.min_level(sids)
+        
+    cover_sids = conversions.gring2cover(mod09.gring_lats, mod09.gring_lons, cover_res)
+    
+    i = sids.shape[0]
+    j = sids.shape[1]
+    l = cover_sids.size 
+    
+    sidecar = Sidecar(file_path, out_path)
+    nom_res = '1km'
+    sidecar.write_dimensions(i, j, l, nom_res=nom_res)    
+    sidecar.write_lons(mod09.lons, nom_res=nom_res)
+    sidecar.write_lats(mod09.lats, nom_res=nom_res)
+    sidecar.write_sids(sids, nom_res=nom_res)
+    sidecar.write_cover(cover_sids, nom_res=nom_res)

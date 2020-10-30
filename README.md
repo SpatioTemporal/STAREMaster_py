@@ -18,7 +18,7 @@ xarray and dask are hardcoded dependecies, but will become optional in the futur
 
 # Usage
 
-```bash
+```
 usage: create_sidecar_files.py [-h] [--folder [folder]] [--out_path [out_path]] [--file [file]] [--product [product]] [--cover_res [cover_res]] [--workers [n_workers]] [--catalogue] [--overwrite]
 
 Creates Sidecar Files
@@ -48,8 +48,10 @@ python3 create_sidecar_files.py --workers 4 --product MOD09 --file ~/MOD09.A2019
 # Extension
 To add support for additional products, we need the following:
 
-1. a module in products/ containing a class for the product that implements the reading of the geolocation and the gring and an import of the module in products/__init__.py
-2. a function that processes the creation of the sidecar file in create_sidecar_files.py
-3. argument parsing for the added product
+1. a module in products/ containing 
+    * a class for the product that implements the reading of the geolocation and the gring 
+    * a method that implements the write_sidecar() function
+2. an import of the new module in products/\_\_init\_\_.py
+3. argument parsing and switch for the added product in create_sidecar_files.py
 
 
