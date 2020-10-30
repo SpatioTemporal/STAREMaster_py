@@ -23,7 +23,7 @@ def list_graunles(folder, product):
     elif product in ['VNP03DNB']:
         extension = 'nc'
         
-    search_term = '{folder}{sep}{trunk}*.{extension}'
+    search_term = '{folder}{sep}{trunk}*[!_stare].{suffix}'
     search_term = search_term.format(folder=folder, sep='/', trunk=product, extension=extension)
     return glob.glob(search_term)
 
