@@ -7,6 +7,7 @@ class Sidecar:
         self.file_path = self.name_from_granule(granule_path, out_path)
         self.create()
         self.zlib = True
+        self.shuffle = True
         
     def name_from_granule(self, granule_path, out_path):
         if out_path:
@@ -38,6 +39,7 @@ class Sidecar:
                                                  datatype='f4', 
                                                  dimensions=(i_name, j_name),
                                                  chunksizes=[i, j],
+                                                 shuffle=self.shuffle,
                                                  zlib=self.zlib)
             lons_netcdf.long_name = 'longitude'
             lons_netcdf.units = 'degrees_east'
@@ -54,6 +56,7 @@ class Sidecar:
                                                  datatype='f4', 
                                                  dimensions=(i_name, j_name),
                                                  chunksizes=[i, j],
+                                                 shuffle=self.shuffle,
                                                  zlib=self.zlib)
             lats_netcdf.long_name = 'latitude'
             lats_netcdf.units = 'degrees_north'
@@ -70,6 +73,7 @@ class Sidecar:
                                          datatype='u8', 
                                          dimensions=(i_name, j_name),
                                          chunksizes=[i, j],
+                                         shuffle=self.shuffle,
                                          zlib=self.zlib)
             sids_netcdf.long_name = 'SpatioTemporal Adaptive Resolution Encoding (STARE) index'
             sids_netcdf[:, :] = sids
@@ -84,6 +88,7 @@ class Sidecar:
                                                   datatype='u8', 
                                                   dimensions=(l_name),
                                                   chunksizes=[l],
+                                                  shuffle=self.shuffle,
                                                   zlib=self.zlib)
             cover_netcdf.long_name = 'SpatioTemporal Adaptive Resolution Encoding (STARE) cover'
  
