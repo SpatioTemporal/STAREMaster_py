@@ -13,29 +13,32 @@ No installer implemented yet
 * argparse
 * xarray
 * dask
+* pandas
 
 xarray and dask are hardcoded dependecies, but will become optional in the future
 
 # Usage
 
 ```
-usage: create_sidecar_files.py [-h] [--folder [folder]] [--out_path [out_path]] [--file [file]] [--product [product]] [--cover_res [cover_res]] [--workers [n_workers]] [--catalogue] [--overwrite]
+usage: create_sidecar_files.py [-h] [--folder folder] [--out_path out_path] [--files files [files ...]] [--product product]
+                               [--cover_res cover_res] [--workers n_workers] [--catalogue catalogue] [--parallel_files]
 
 Creates Sidecar Files
 
 optional arguments:
   -h, --help            show this help message and exit
-  --folder [folder]     the folder to create sidecars for
-  --out_path [out_path]
-                        the folder to create sidecars in; default: next to granule
-  --file [file]         the file to create a sidecar for
-  --product [product]   product (e.g. VNP03DNB, MOD09)
-  --cover_res [cover_res]
+  --folder folder       the folder to create sidecars for
+  --out_path out_path   the folder to create sidecars in; default: next to granule
+  --files files [files ...]
+                        the file to create a sidecar for
+  --product product     product (e.g. VNP03DNB, MOD09)
+  --cover_res cover_res
                         max STARE resolution of the cover. Default: min resolution of iFOVs
-  --workers [n_workers]
-                        use n_workers (local) dask workers
-  --catalogue           toggle creating a catalogue
-  --overwrite           overwrite sidecar if file with same name exists (default: True)
+  --workers n_workers   use n_workers (local) dask workers
+  --catalogue catalogue
+                        Create sidecars only for granules not listed in the archive file. Record all create sidecars and their
+                        corresponding granules in it.
+  --parallel_files      Process files in parallel rather than looking up SIDs in parallel
 
 ```
 

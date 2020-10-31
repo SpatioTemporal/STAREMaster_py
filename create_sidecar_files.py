@@ -4,10 +4,16 @@ import argparse
 import products
 import glob
 import pandas
+import multiprocessing
+import itertools
+import filelock
 
 
 
-def create_sidecar(file_path, workers, product, cover_res, out_path):
+def create_sidecar(file_path, workers, product, cover_res, out_path, catalogue):
+    if product is None:
+            product = guess_product(file_path)
+            
     if product == 'MOD09':
         sidecar = products.mod09.create_sidecar(file_path, workers, cover_res, out_path)
     elif product == 'MOD05':
@@ -18,7 +24,13 @@ def create_sidecar(file_path, workers, product, cover_res, out_path):
         # Would be nice if we would a) catch this in main and b) if we could list the modules in products
         print('product not supported')
         quit()
-    return sidecar    
+        
+    if catalogue:
+        with filelock.FileLock(catalogue + '.lock.'):        
+            with open(catalogue, 'a') as cat:
+                line = '{}, {} \n'.format(file_path, sidecar.file_path)
+                cat.writelines(line)
+                
     
 def list_graunles(folder, product): 
     if product in ['MOD09', 'MOD05']:
@@ -44,13 +56,16 @@ def guess_product(file_path):
     return product
         
         
-def remove_skippable(file_paths, catalogue):
-    file_paths = pandas.Series(file_paths)
-    processed = pandas.read_csv(catalogue, header=None)[0]
-    skip = file_paths.isin(list(processed))
-    print('The following granules have been recorded in the archive and will not be processed')
-    print(file_paths[skip==True])
-    unprocessed = list(file_paths[skip==False])
+def remove_skippable(file_paths, catalogue):    
+    if glob.glob(catalogue):
+        file_paths = pandas.Series(file_paths)
+        processed = pandas.read_csv(catalogue, header=None)[0]        
+        skip = file_paths.isin(list(processed))
+        print('The following granules have been recorded in the archive and will not be processed')
+        print(file_paths[skip==True])
+        unprocessed = list(file_paths[skip==False])
+    else:
+        unprocessed = file_paths
     return unprocessed 
     
         
@@ -70,10 +85,12 @@ if __name__ == '__main__':
                         help='use n_workers (local) dask workers')
     parser.add_argument('--catalogue', metavar='catalogue',  type=str, 
                         help='Create sidecars only for granules not listed in the archive file. Record all create sidecars and their corresponding granules in it.')
-    
+    parser.add_argument('--parallel_files', dest='parallel_files', action='store_true',
+                        help='Process files in parallel rather than looking up SIDs in parallel')
     
     parser.set_defaults(catalogue=False)    
-    parser.set_defaults(overwrite=True)        
+    parser.set_defaults(parallel_files=False)    
+    
     args = parser.parse_args()
         
     product = None
@@ -92,20 +109,26 @@ if __name__ == '__main__':
     if args.catalogue:
         file_paths = remove_skippable(file_paths, args.catalogue)
 
-    for file_path in file_paths:
-        if args.product is None:
-            product = guess_product(file_path)
-
-        sidecar = create_sidecar(file_path=file_path,
-                                 workers=args.workers,
-                                 product=product, 
-                                 out_path=args.out_path,
-                                 cover_res=args.cover_res)
+    if args.parallel_files:
+        map_args = zip(file_paths, 
+                       itertools.repeat(None),
+                       itertools.repeat(args.product),
+                       itertools.repeat(args.out_path),
+                       itertools.repeat(args.cover_res),
+                       itertools.repeat(args.catalogue))
+        with multiprocessing.Pool(processes=args.workers) as pool:
+            pool.starmap(create_sidecar, map_args)
+    else:
+        for file_path in file_paths:
+            create_sidecar(file_path=file_path,
+                           workers=args.workers,
+                           product=args.product, 
+                           out_path=args.out_path,
+                           cover_res=args.cover_res,
+                           catalogue=args.catalogue)
         
-        if args.catalogue:
-            with open(args.catalogue, 'a') as cat:
-                line = '{}, {} \n'.format(file_path, sidecar.file_path)
-                cat.writelines(line)
+        
+                
             
         
         
