@@ -1,6 +1,6 @@
-from sidecar import Sidecar
 import conversions
 from products.hdfeos import HDFeos
+from sidecar import Sidecar
 
 
 class MOD05(HDFeos):
@@ -19,15 +19,14 @@ class MOD05(HDFeos):
         self.gring_lons = list(map(float, lons.strip('()').split(', ')))[::-1]
         
 
-def create_sidecar(file_path, workers, out_path, cover_res):
+def create_sidecar(file_path, workers, cover_res, out_path):
     nom_res = '5km'
     granule = MOD05(file_path)    
     
     sids = conversions.latlon2stare(granule.lats, granule.lons, workers)
     
     if not cover_res:
-        #cover_res = conversions.min_level(sids)
-        cover_res = conversions.max_level(sids)
+        cover_res = conversions.min_level(sids)
         
     cover_sids = conversions.gring2cover(granule.gring_lats, granule.gring_lons, cover_res)
     
@@ -36,9 +35,9 @@ def create_sidecar(file_path, workers, out_path, cover_res):
     l = cover_sids.size 
     
     sidecar = Sidecar(file_path, out_path)
-    
     sidecar.write_dimensions(i, j, l, nom_res=nom_res)    
     sidecar.write_lons(granule.lons, nom_res=nom_res)
     sidecar.write_lats(granule.lats, nom_res=nom_res)
     sidecar.write_sids(sids, nom_res=nom_res)
     sidecar.write_cover(cover_sids, nom_res=nom_res)
+    return sidecar
