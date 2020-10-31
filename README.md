@@ -36,7 +36,8 @@ optional arguments:
                         max STARE resolution of the cover. Default: min resolution of iFOVs
   --workers n_workers   use n_workers (local) dask workers
   --catalogue catalogue
-                        Create sidecars only for granules not listed in the archive file. Record all create sidecars and their
+                        Create sidecars only for granules not listed in the archive file. 
+                        Record all create sidecars and their
                         corresponding granules in it.
   --parallel_files      Process files in parallel rather than looking up SIDs in parallel
 
@@ -45,7 +46,8 @@ optional arguments:
 e.g.
 
 ```bash
-python3 create_sidecar_files.py --workers 4 --product MOD09 --file ~/MOD09.A2019317.0815.006.2019319020759.hdf
+python3 create_sidecar_files.py --workers 4 
+       --product MOD09 --file ~/MOD09.A2019317.0815.006.2019319020759.hdf
 ```
 
 # Extension
