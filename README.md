@@ -20,18 +20,20 @@ xarray and dask are hardcoded dependecies, but will become optional in the futur
 # Usage
 
 ```
-usage: create_sidecar_files.py [-h] [--folder folder] [--out_path out_path] [--files files [files ...]] [--product product]
-                               [--cover_res cover_res] [--workers n_workers] [--catalogue catalogue] [--parallel_files]
+usage: create_sidecar_files.py [-h] [--folder folder] 
+[--files files [files ...]] [--out_path out_path] 
+[--product product] [--cover_res cover_res] [--workers n_workers] 
+[--catalogue catalogue] [--parallel_files]
 
 Creates Sidecar Files
 
 optional arguments:
   -h, --help            show this help message and exit
   --folder folder       the folder to create sidecars for
-  --out_path out_path   the folder to create sidecars in; default: next to granule
   --files files [files ...]
-                        the file to create a sidecar for
-  --product product     product (e.g. VNP03DNB, MOD09)
+                        the files to create a sidecar for
+  --out_path out_path   the folder to create sidecars in; default: next to granule
+  --product product     product (e.g. VNP03DNB, MOD09, MOD05)
   --cover_res cover_res
                         max STARE resolution of the cover. Default: min resolution of iFOVs
   --workers n_workers   use n_workers (local) dask workers
@@ -39,7 +41,7 @@ optional arguments:
                         Create sidecars only for granules not listed in the archive file. 
                         Record all create sidecars and their
                         corresponding granules in it.
-  --parallel_files      Process files in parallel rather than looking up SIDs in parallel
+
 
 ```
 
