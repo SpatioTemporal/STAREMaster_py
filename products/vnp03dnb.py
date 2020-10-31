@@ -24,7 +24,7 @@ class VNP03DNB:
         self.gring_lons = self.netcdf.GRingPointLongitude[::-1]
          
 
-def create_sidecar(file_path, workers, out_path, cover_res):
+def write_sidecar(file_path, workers, cover_res, out_path):
     vnp03 = VNP03DNB(file_path)
     
     sids = conversions.latlon2stare(vnp03.lats, vnp03.lons, workers)
@@ -37,10 +37,11 @@ def create_sidecar(file_path, workers, out_path, cover_res):
     j = vnp03.lats.shape[1]
     l = cover_sids.size
     
-    sidecar = Sidecar(file_path, out_path)
     nom_res = '750m'
+    sidecar = Sidecar(file_path, out_path)
     sidecar.write_dimensions(i, j, l, nom_res=nom_res)    
     sidecar.write_lons(vnp03.lons, nom_res=nom_res)
     sidecar.write_lats(vnp03.lats, nom_res=nom_res)
     sidecar.write_sids(sids, nom_res=nom_res)
     sidecar.write_cover(cover_sids, nom_res=nom_res)
+    return sidecar
