@@ -1,9 +1,8 @@
 #!/usr/bin/python3
 
 import argparse
-import products
+import staremaster.products
 import glob
-import pandas
 import multiprocessing
 import itertools
 import filelock
@@ -15,11 +14,11 @@ def create_sidecar(file_path, workers, product, cover_res, out_path, catalogue):
             product = guess_product(file_path)
             
     if product == 'MOD09':
-        sidecar = products.mod09.create_sidecar(file_path, workers, cover_res, out_path)
+        sidecar = staremaster.products.mod09.create_sidecar(file_path, workers, cover_res, out_path)
     elif product == 'MOD05':
-        sidecar = products.mod05.create_sidecar(file_path, workers, cover_res, out_path)
+        sidecar = staremaster.products.mod05.create_sidecar(file_path, workers, cover_res, out_path)
     elif product == 'VNP03DNB':
-        sidecar = products.vnp03dnb.create_sidecar(file_path, workers, cover_res, out_path)
+        sidecar = staremaster.products.vnp03dnb.create_sidecar(file_path, workers, cover_res, out_path)
     else:        
         # Would be nice if we would a) catch this in main and b) if we could list the modules in products
         print('product not supported')
@@ -58,12 +57,14 @@ def guess_product(file_path):
         
 def remove_skippable(file_paths, catalogue):    
     if glob.glob(catalogue):
-        file_paths = pandas.Series(file_paths)
-        processed = pandas.read_csv(catalogue, header=None)[0]        
-        skip = file_paths.isin(list(processed))
+        with open(catalogue, 'r') as cat:
+            csv = cat.readlines()
+        loaded_files = []
+        for row in csv:
+            loaded_files.append(row.split(',')[0])            
         print('The following granules have been recorded in the archive and will not be processed')
-        print(file_paths[skip==True])
-        unprocessed = list(file_paths[skip==False])
+        print(loaded_files)
+        unprocessed = list(set(file_paths) - set(catalogue))
     else:
         unprocessed = file_paths
     return unprocessed 
@@ -73,12 +74,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Creates Sidecar Files')
     parser.add_argument('--folder', metavar='folder', type=str, 
                         help='the folder to create sidecars for')
+    parser.add_argument('--files', metavar='files', nargs='+', type=str, 
+                        help='the files to create a sidecar for')
     parser.add_argument('--out_path', metavar='out_path',  type=str, 
                         help='the folder to create sidecars in; default: next to granule')
-    parser.add_argument('--files', metavar='files', nargs='+', type=str, 
-                        help='the file to create a sidecar for')
     parser.add_argument('--product', metavar='product', type=str, 
-                        help='product (e.g. VNP03DNB, MOD09)')
+                        help='product (e.g. VNP03DNB, MOD09, MOD05)')
     parser.add_argument('--cover_res', metavar='cover_res', type=int, 
                         help='max STARE resolution of the cover. Default: min resolution of iFOVs')    
     parser.add_argument('--workers', metavar='n_workers', type=int, 

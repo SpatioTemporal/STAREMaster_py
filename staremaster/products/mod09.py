@@ -1,6 +1,6 @@
-import conversions
-from products.hdfeos import HDFeos
-from sidecar import Sidecar
+import staremaster.conversions
+from staremaster.products.hdfeos import HDFeos
+from staremaster.sidecar import Sidecar
 
 
 class MOD09(HDFeos):
@@ -23,12 +23,12 @@ def create_sidecar(file_path, workers, cover_res, out_path):
     nom_res = '1km'
     granule = MOD09(file_path)    
     
-    sids = conversions.latlon2stare(granule.lats, granule.lons, workers)
+    sids = staremaster.conversions.latlon2stare(granule.lats, granule.lons, workers)
     
     if not cover_res:
-        cover_res = conversions.min_level(sids)
+        cover_res = staremaster.conversions.min_level(sids)
         
-    cover_sids = conversions.gring2cover(granule.gring_lats, granule.gring_lons, cover_res)
+    cover_sids = staremaster.conversions.gring2cover(granule.gring_lats, granule.gring_lons, cover_res)
     
     i = sids.shape[0]
     j = sids.shape[1]
