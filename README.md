@@ -39,7 +39,11 @@ xarray and dask are hardcoded dependecies, but will become optional in the futur
 # Usage
 
 ```
-usage: create_sidecar_files.py [-h] [--folder folder] [--files files [files ...]] [--out_path out_path] [--product product] [--cover_res cover_res] [--workers n_workers] [--catalogue catalogue] [--parallel_files]
+
+usage: create_sidecar_files.py [-h] [--folder folder] 
+[--files files [files ...]] [--out_path out_path] 
+[--product product] [--cover_res cover_res] [--workers n_workers] 
+[--catalogue catalogue] [--parallel_files]
 
 Creates Sidecar Files
 
@@ -64,7 +68,8 @@ optional arguments:
 e.g.
 
 ```bash
-python3 create_sidecar_files.py --workers 4 --product MOD09 --file ~/MOD09.A2019317.0815.006.2019319020759.hdf
+python3 create_sidecar_files.py --workers 4 
+       --product MOD09 --file ~/MOD09.A2019317.0815.006.2019319020759.hdf
 ```
 
 # Extension
