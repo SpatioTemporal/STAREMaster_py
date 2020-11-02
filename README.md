@@ -13,7 +13,7 @@ No installer implemented yet
 * argparse
 * xarray
 * dask
-* pandas
+* filelock
 
 xarray and dask are hardcoded dependecies, but will become optional in the future
 
@@ -35,7 +35,8 @@ optional arguments:
                         max STARE resolution of the cover. Default: min resolution of iFOVs
   --workers n_workers   use n_workers (local) dask workers
   --catalogue catalogue
-                        Create sidecars only for granules not listed in the archive file. Record all create sidecars and their
+                        Create sidecars only for granules not listed in the archive file. 
+                        Record all create sidecars and their
                         corresponding granules in it.
 
 
