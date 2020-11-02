@@ -34,9 +34,10 @@ setup(
     url="https://github.com/NiklasPhabian/STAREMaster_py",
     long_description=LONG_DESCRIPTION,
     packages=[
-        "staremaster",
+        "staremaster"
     ],
     scripts=['create_sidecar_files.py'],
     python_requires=">=3.5",
     install_requires=install_requires,
+    test_suite='tests'
 ) 

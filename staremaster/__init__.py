@@ -1,1 +1,1 @@
- 
+import staremaster.products 
