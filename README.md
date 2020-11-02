@@ -52,13 +52,16 @@ optional arguments:
   --folder folder       the folder to create sidecars for
   --files files [files ...]
                         the files to create a sidecar for
-  --out_path out_path   the folder to create sidecars in; default: next to granule
+  --out_path out_path   the folder to create sidecars in; 
+                        default: next to granule
   --product product     product (e.g. VNP03DNB, MOD09, MOD05)
   --cover_res cover_res
-                        max STARE resolution of the cover. Default: min resolution of iFOVs
+                        max STARE resolution of the cover.
+                        Default: min resolution of iFOVs
   --workers n_workers   use n_workers (local) dask workers
   --catalogue catalogue
-                        Create sidecars only for granules not listed in the archive file. 
+                        Create sidecars only for granules not 
+                        listed in the archive file. 
                         Record all create sidecars and their
                         corresponding granules in it.
 

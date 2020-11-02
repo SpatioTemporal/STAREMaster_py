@@ -12,7 +12,6 @@ import filelock
 def create_sidecar(file_path, workers, product, cover_res, out_path, catalogue):
     if product is None:
             product = guess_product(file_path)
-            
     if product == 'MOD09':
         sidecar = staremaster.products.mod09.create_sidecar(file_path, workers, cover_res, out_path)
     elif product == 'MOD05':
