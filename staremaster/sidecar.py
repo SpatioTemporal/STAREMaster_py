@@ -91,4 +91,5 @@ class Sidecar:
                                                   shuffle=self.shuffle,
                                                   zlib=self.zlib)
             cover_netcdf.long_name = 'SpatioTemporal Adaptive Resolution Encoding (STARE) cover'
+            cover_netcdf[:] = cover
  
