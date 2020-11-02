@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import argparse
-import products
+import staremaster.products
 import glob
 import multiprocessing
 import itertools
@@ -14,11 +14,11 @@ def create_sidecar(file_path, workers, product, cover_res, out_path, catalogue):
             product = guess_product(file_path)
             
     if product == 'MOD09':
-        sidecar = products.mod09.create_sidecar(file_path, workers, cover_res, out_path)
+        sidecar = staremaster.products.mod09.create_sidecar(file_path, workers, cover_res, out_path)
     elif product == 'MOD05':
-        sidecar = products.mod05.create_sidecar(file_path, workers, cover_res, out_path)
+        sidecar = staremaster.products.mod05.create_sidecar(file_path, workers, cover_res, out_path)
     elif product == 'VNP03DNB':
-        sidecar = products.vnp03dnb.create_sidecar(file_path, workers, cover_res, out_path)
+        sidecar = staremaster.products.vnp03dnb.create_sidecar(file_path, workers, cover_res, out_path)
     else:        
         # Would be nice if we would a) catch this in main and b) if we could list the modules in products
         print('product not supported')

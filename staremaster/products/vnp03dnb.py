@@ -1,7 +1,7 @@
 import netCDF4
 import numpy
-from sidecar import Sidecar
-import conversions
+from staremaster.sidecar import Sidecar
+import staremaster.conversions
 
 
 class VNP03DNB:
@@ -24,14 +24,14 @@ class VNP03DNB:
         self.gring_lons = self.netcdf.GRingPointLongitude[::-1]
          
 
-def write_sidecar(file_path, workers, cover_res, out_path):
+def create_sidecar(file_path, workers, cover_res, out_path):
     vnp03 = VNP03DNB(file_path)
     
-    sids = conversions.latlon2stare(vnp03.lats, vnp03.lons, workers)
+    sids = staremaster.conversions.latlon2stare(vnp03.lats, vnp03.lons, workers)
     
     if not cover_res:
-        cover_res = conversions.min_level(sids)
-    cover_sids = conversions.gring2cover(vnp03.gring_lats, vnp03.gring_lons, cover_res)
+        cover_res = staremaster.conversions.min_level(sids)
+    cover_sids = staremaster.conversions.gring2cover(vnp03.gring_lats, vnp03.gring_lons, cover_res)
     
     i = vnp03.lats.shape[0]
     j = vnp03.lats.shape[1]

@@ -2,7 +2,26 @@ This is a python implementation of STAREMaster.
 
 
 # Install
-No installer implemented yet
+
+## With pip
+The installer will install the create_sidecar_files.py script and its dependencies.
+
+Create a virtualenv:
+
+    mkvirtualevironment staremaster_py
+
+The dependency pystare is not yet on pypi and therefore has to be installed e.g. from github:
+
+    pip3 install git+https://github.com/NiklasPhabian/pystare.git
+    
+we then can install STAREMaster_py with 
+
+    pip3 install -e STAREMaster_py/
+
+    
+## 
+    
+
 
 # Requirements
 
@@ -12,7 +31,7 @@ No installer implemented yet
 * netCDF4
 * argparse
 * xarray
-* dask
+* dask['distributed']
 * filelock
 
 xarray and dask are hardcoded dependecies, but will become optional in the future
