@@ -19,7 +19,10 @@ we then can install STAREMaster_py with
     pip3 install -e STAREMaster_py/
 
     
-## 
+## Conda
+
+    conda create --name staremaster
+    conda activate staremaster
     
 
 
