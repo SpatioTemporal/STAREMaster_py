@@ -29,7 +29,7 @@ class VNP02DNB(VNP03DNB):
 def create_sidecar(file_path, workers, cover_res, out_path):
     vnp03 = VNP02DNB(file_path)
     
-    sids = staremaster.conversions.latlon2stare(vnp03.lats, vnp03.lons, workers)
+    sids = staremaster.conversions.latlon2stare(lats=granule.lats, lons=granule.lons, resolution=-1, workers=workers, adapt_resolution=True)
     
     if not cover_res:
         cover_res = staremaster.conversions.min_level(sids)

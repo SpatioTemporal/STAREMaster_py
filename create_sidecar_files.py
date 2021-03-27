@@ -10,7 +10,7 @@ import pkgutil
 import importlib
 
 
-def create_sidecar(file_path, workers, product, cover_res, out_path, catalogue):
+def create_sidecar(file_path, workers, product, cover_res, out_path, archive):
 
     if product is None:
         product = guess_product(file_path)
@@ -23,15 +23,16 @@ def create_sidecar(file_path, workers, product, cover_res, out_path, catalogue):
         sidecar = staremaster.products.vnp03dnb.create_sidecar(file_path, workers, cover_res, out_path)
     elif product == 'VNP02DNB':
         sidecar = staremaster.products.vnp02dnb.create_sidecar(file_path, workers, cover_res, out_path)
+    elif product == 'CLDMSK_L2_VIIRS':
+        sidecar = staremaster.products.cldmsk_l2_viirs.create_sidecar(file_path, workers, cover_res, out_path)
     else:        
-        # Would be nice if we would a) catch this in main and b) if we could list the modules in products
         print('product not supported')
         print('supported products are {}'.format(get_installed_products()))
         quit()
         
-    if catalogue:
-        with filelock.FileLock(catalogue + '.lock.'):        
-            with open(catalogue, 'a') as cat:
+    if archive:
+        with filelock.FileLock(archive + '.lock.'):        
+            with open(archive, 'a') as cat:
                 line = '{}, {} \n'.format(file_path, sidecar.file_path)
                 cat.writelines(line)
                 
@@ -53,18 +54,20 @@ def guess_product(file_path):
         product = 'MOD05'
     elif ('MOD09.' in file_path and '.hdf' in file_name):
         product = 'MOD09'
-    elif ('VNP03DNB.' in file_path and '.nc' in file_name):
+    elif (('VNP03DNB' in file_path or 'VJ103DNB' in file_path) and '.nc' in file_name):
         product = 'VNP03DNB'
-    elif ('VNP02DNB.' in file_path and '.nc' in file_name):
+    elif (('VNP02DNB' in file_path or 'VJ102DNB' in file_path) and '.nc' in file_name):
         product = 'VNP02DNB'
+    elif ('CLDMSK_L2_VIIRS' in file_path and '.nc' in file_name):
+        product = 'CLDMSK_L2_VIIRS'        
     else:
         product = None
     return product
         
         
-def remove_skippable(file_paths, catalogue):    
-    if glob.glob(catalogue):
-        with open(catalogue, 'r') as cat:
+def remove_archived(file_paths, archive):    
+    if glob.glob(archive):
+        with open(archive, 'r') as cat:
             csv = cat.readlines()
         loaded_files = []
         for row in csv:
@@ -75,6 +78,7 @@ def remove_skippable(file_paths, catalogue):
     else:
         unprocessed = file_paths
     return unprocessed 
+
 
 def get_installed_products():
     starmeaster_path = importlib.util.find_spec('staremaster.products').submodule_search_locations[0]
@@ -99,12 +103,13 @@ if __name__ == '__main__':
                         help='max STARE resolution of the cover. Default: min resolution of iFOVs')    
     parser.add_argument('--workers', metavar='n_workers', type=int, 
                         help='use n_workers (local) dask workers')
-    parser.add_argument('--catalogue', metavar='catalogue',  type=str, 
-                        help='Create sidecars only for granules not listed in the archive file. Record all create sidecars and their corresponding granules in it.')
+    parser.add_argument('--archive', metavar='archive',  type=str, 
+                        help='''Create sidecars only for granules not listed in the archive file. 
+                        Record all create sidecars and their corresponding granules in it.''')
     parser.add_argument('--parallel_files', dest='parallel_files', action='store_true',
                         help='Process files in parallel rather than looking up SIDs in parallel')
     
-    parser.set_defaults(catalogue=False)    
+    parser.set_defaults(archive=False)    
     parser.set_defaults(parallel_files=False)    
     
     args = parser.parse_args()
@@ -118,8 +123,8 @@ if __name__ == '__main__':
         print(parser.print_help())
         quit()
         
-    if args.catalogue:
-        file_paths = remove_skippable(file_paths, args.catalogue)
+    if args.archive:
+        file_paths = remove_archived(file_paths, args.archive)
 
     if args.parallel_files:
         map_args = zip(file_paths, 
@@ -127,7 +132,7 @@ if __name__ == '__main__':
                        itertools.repeat(args.product),
                        itertools.repeat(args.out_path),
                        itertools.repeat(args.cover_res),
-                       itertools.repeat(args.catalogue))
+                       itertools.repeat(args.archive))
         with multiprocessing.Pool(processes=args.workers) as pool:
             pool.starmap(create_sidecar, map_args)
     else:
@@ -137,5 +142,5 @@ if __name__ == '__main__':
                            product=args.product, 
                            out_path=args.out_path,
                            cover_res=args.cover_res,
-                           catalogue=args.catalogue)
+                           archive=args.archive)
         

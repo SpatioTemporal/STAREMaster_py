@@ -5,3 +5,5 @@ dask-worker-space/*
 *.kate-swp*
 build/*
 dist/*
+*.dirlock
+*.lock
