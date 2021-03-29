@@ -14,7 +14,9 @@ def create_sidecar(file_path, workers, product, cover_res, out_path, archive):
 
     if product is None:
         product = guess_product(file_path)
-
+    
+    product = product.upper()
+        
     if product == 'MOD09':
         sidecar = staremaster.products.mod09.create_sidecar(file_path, workers, cover_res, out_path)
     elif product == 'MOD05':
@@ -37,14 +39,13 @@ def create_sidecar(file_path, workers, product, cover_res, out_path, archive):
                 cat.writelines(line)
                 
     
-def list_graunles(folder, product): 
+def list_graunles(folder, product):
     if product in ['MOD09', 'MOD05']:
         extension = 'hdf'
-    elif product in ['VNP03DNB']:
-        extension = 'nc'
-        
+    else:
+        extension = 'nc'        
     search_term = '{folder}{sep}{trunk}*[!_stare].{extension}'
-    search_term = search_term.format(folder=folder, sep='/', trunk=product, extension=extension)
+    search_term = search_term.format(folder=folder, sep='/', trunk=product.upper(), extension=extension)
     return glob.glob(search_term)
 
 
@@ -97,7 +98,7 @@ if __name__ == '__main__':
     parser.add_argument('--out_path', metavar='out_path',  type=str, 
                         help='the folder to create sidecars in; default: next to granule')
     parser.add_argument('--product', metavar='product', type=str, 
-                        help='product (e.g. VNP03DNB, MOD09, MOD05)',
+                        help='product (e.g. VNP03DNB, MOD09, MOD05, CLDMSK_L2_VIIRS)',
                         choices=installed_products)
     parser.add_argument('--cover_res', metavar='cover_res', type=int, 
                         help='max STARE resolution of the cover. Default: min resolution of iFOVs')    

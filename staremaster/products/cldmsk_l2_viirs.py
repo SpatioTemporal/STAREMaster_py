@@ -12,8 +12,11 @@ class CLMDKS_L2_VIIRS:
         self.lons = None
         self.gring_lats = None
         self.gring_lon = None
-        self.read_latlon()
-        self.read_gring()
+        try:
+            self.read_latlon()
+            self.read_gring()
+        except:
+            print(file_path)            
         
     def read_latlon(self):
         self.lats = self.netcdf.groups['geolocation_data']['latitude'][:].data.astype(numpy.double)
