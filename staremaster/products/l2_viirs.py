@@ -1,0 +1,44 @@
+import netCDF4
+import numpy
+from staremaster.sidecar import Sidecar
+import staremaster.conversions
+
+
+class L2_VIIRS:
+    
+    def __init__(self, file_path):
+        self.file_path = file_path
+        self.netcdf = netCDF4.Dataset(file_path, 'r', format='NETCDF4')        
+        self.lats = None
+        self.lons = None
+        self.gring_lats = None
+        self.gring_lon = None      
+        
+    def read_latlon(self):
+        self.lats = self.netcdf.groups['geolocation_data']['latitude'][:].data.astype(numpy.double)
+        self.lons = self.netcdf.groups['geolocation_data']['longitude'][:].data.astype(numpy.double)
+        
+    def read_gring(self):        
+        self.gring_lats = self.netcdf.GRingPointLatitude[::-1]
+        self.gring_lons = self.netcdf.GRingPointLongitude[::-1]
+         
+
+    def create_sidecar(self, workers, cover_res, out_path):
+        sids = staremaster.conversions.latlon2stare(lats=self.lats, lons=self.lons, resolution=-1, workers=workers, adapt_resolution=True)    
+        
+        if not cover_res:
+            cover_res = staremaster.conversions.min_level(sids)
+            
+        cover_sids = staremaster.conversions.gring2cover(self.gring_lats, self.gring_lons, cover_res)
+        
+        i = self.lats.shape[0]
+        j = self.lats.shape[1]
+        l = cover_sids.size
+        
+        sidecar = Sidecar(self.file_path, out_path)
+        sidecar.write_dimensions(i, j, l, nom_res=self.nom_res)    
+        sidecar.write_lons(self.lons, nom_res=self.nom_res)
+        sidecar.write_lats(self.lats, nom_res=self.nom_res)
+        sidecar.write_sids(sids, nom_res=self.nom_res)
+        sidecar.write_cover(cover_sids, nom_res=self.nom_res)
+        return sidecar

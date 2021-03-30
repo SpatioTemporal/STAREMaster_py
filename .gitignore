@@ -7,3 +7,5 @@ build/*
 dist/*
 *.dirlock
 *.lock
+*.egg-info/
+

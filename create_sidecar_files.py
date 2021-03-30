@@ -17,20 +17,26 @@ def create_sidecar(file_path, workers, product, cover_res, out_path, archive):
     
     product = product.upper()
         
-    if product == 'MOD09':
-        sidecar = staremaster.products.mod09.create_sidecar(file_path, workers, cover_res, out_path)
-    elif product == 'MOD05':
-        sidecar = staremaster.products.mod05.create_sidecar(file_path, workers, cover_res, out_path)
-    elif product == 'VNP03DNB':
-        sidecar = staremaster.products.vnp03dnb.create_sidecar(file_path, workers, cover_res, out_path)
+    if product == 'MOD05':
+        granule = staremaster.products.MOD05(file_path)
+    elif product == 'MOD09':
+        granule = staremaster.products.MOD09(file_path)
     elif product == 'VNP02DNB':
-        sidecar = staremaster.products.vnp02dnb.create_sidecar(file_path, workers, cover_res, out_path)
+        granule= staremaster.products.VNP02DNB(file_path)
+    elif product == 'VNP03DNB':
+        granule = staremaster.products.VNP03DNB(file_path)
+    elif product == 'VJ102DNB':
+        granule= staremaster.products.VJ102DNB(file_path)
+    elif product == 'VJ103DNB':
+        granule = staremaster.products.VJ103DNB(file_path)
     elif product == 'CLDMSK_L2_VIIRS':
-        sidecar = staremaster.products.cldmsk_l2_viirs.create_sidecar(file_path, workers, cover_res, out_path)
+        granule = staremaster.products.CLMDKS_L2_VIIRS(file_path)
     else:        
         print('product not supported')
         print('supported products are {}'.format(get_installed_products()))
         quit()
+        
+    sidecar = granule.create_sidecar(workers, cover_res, out_path)
         
     if archive:
         with filelock.FileLock(archive + '.lock.'):        
@@ -98,7 +104,7 @@ if __name__ == '__main__':
     parser.add_argument('--out_path', metavar='out_path',  type=str, 
                         help='the folder to create sidecars in; default: next to granule')
     parser.add_argument('--product', metavar='product', type=str, 
-                        help='product (e.g. VNP03DNB, MOD09, MOD05, CLDMSK_L2_VIIRS)',
+                        help='product (e.g. cldmsk_l2_viirs, hdfeos, l2_viirs, mod05, mod09, vj102dnb, vj103dnb, vnp02dnb, vnp03dnb, xcal1C_ssmi)',
                         choices=installed_products)
     parser.add_argument('--cover_res', metavar='cover_res', type=int, 
                         help='max STARE resolution of the cover. Default: min resolution of iFOVs')    

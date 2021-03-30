@@ -51,3 +51,25 @@ class HDFeos:
             m = parse_hdfeos_metadata(string)
             metadata_group  = {**metadata_group, **m}    
         return metadata_group
+    
+    def create_sidecar(self,workers, cover_res, out_path):        
+            
+        sids = staremaster.conversions.latlon2stare(self.lats, self.lons, resolution=-1, workers=workers, adapt_resolution=True)
+        
+        if not cover_res:
+            cover_res = staremaster.conversions.min_level(sids)
+            
+        cover_sids = staremaster.conversions.gring2cover(self.gring_lats, self.gring_lons, cover_res)
+        
+        i = self.lats.shape[0]
+        j = self.lats.shape[1]
+        l = cover_sids.size
+        
+        sidecar = Sidecar(self.file_path, out_path)
+        sidecar.write_dimensions(i, j, l, nom_res=self.nom_res)    
+        sidecar.write_lons(granule.lons, nom_res=self.nom_res)
+        sidecar.write_lats(granule.lats, nom_res=self.nom_res)
+        sidecar.write_sids(sids, nom_res=self.nom_res)
+        sidecar.write_cover(cover_sids, nom_res=self.nom_res)
+        return sidecar
+
