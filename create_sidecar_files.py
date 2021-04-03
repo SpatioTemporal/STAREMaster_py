@@ -8,6 +8,7 @@ import itertools
 import filelock
 import pkgutil
 import importlib
+import re
 
 
 def create_sidecar(file_path, workers, product, cover_res, out_path, archive):
@@ -46,20 +47,20 @@ def create_sidecar(file_path, workers, product, cover_res, out_path, archive):
                 
     
 def list_graunles(folder, product):
-    if product in ['MOD09', 'MOD05']:
-        extension = 'hdf'
-    else:
-        extension = 'nc'        
-    search_term = '{folder}{sep}{trunk}*[!_stare].{extension}'
-    search_term = search_term.format(folder=folder, sep='/', trunk=product.upper(), extension=extension)
-    return glob.glob(search_term)
+    if not product:
+        product = ''
+    
+    files = glob.glob(folder + '/*')
+    pattern = '.*{product}.*[^_stare]\.(nc|hdf)'.format(product=product)
+    granules = list(filter(re.compile(pattern).match, files))        
+    return granules
 
 
 def guess_product(file_path):
     file_name = file_path.split('/')[-1]
     if ('MOD05_L2' in file_path and '.hdf' in file_name):
         product = 'MOD05'
-    elif ('MOD09.' in file_path and '.hdf' in file_name):
+    elif ('MOD09' in file_path and '.hdf' in file_name):
         product = 'MOD09'
     elif (('VNP03DNB' in file_path or 'VJ103DNB' in file_path) and '.nc' in file_name):
         product = 'VNP03DNB'
@@ -105,7 +106,7 @@ if __name__ == '__main__':
                         help='the folder to create sidecars in; default: next to granule')
     parser.add_argument('--product', metavar='product', type=str, 
                         help='product (e.g. cldmsk_l2_viirs, hdfeos, l2_viirs, mod05, mod09, vj102dnb, vj103dnb, vnp02dnb, vnp03dnb, xcal1C_ssmi)',
-                        choices=installed_products)
+                        choices=installed_products, default=None)
     parser.add_argument('--cover_res', metavar='cover_res', type=int, 
                         help='max STARE resolution of the cover. Default: min resolution of iFOVs')    
     parser.add_argument('--workers', metavar='n_workers', type=int, 

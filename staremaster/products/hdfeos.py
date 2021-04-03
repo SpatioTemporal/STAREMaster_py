@@ -1,5 +1,7 @@
 from pyhdf.SD import SD
 import numpy
+import staremaster
+from staremaster.sidecar import Sidecar
 
  
 def parse_hdfeos_metadata(string):
@@ -38,6 +40,7 @@ class HDFeos:
         self.gring_lats = None
         self.gring_lons = None
         self.hdf = SD(file_path)
+        self.file_path = file_path
         
     def read_laton(self):
         self.lons = self.hdf.select('Longitude').get().astype(numpy.double)
@@ -67,8 +70,8 @@ class HDFeos:
         
         sidecar = Sidecar(self.file_path, out_path)
         sidecar.write_dimensions(i, j, l, nom_res=self.nom_res)    
-        sidecar.write_lons(granule.lons, nom_res=self.nom_res)
-        sidecar.write_lats(granule.lats, nom_res=self.nom_res)
+        sidecar.write_lons(self.lons, nom_res=self.nom_res)
+        sidecar.write_lats(self.lats, nom_res=self.nom_res)
         sidecar.write_sids(sids, nom_res=self.nom_res)
         sidecar.write_cover(cover_sids, nom_res=self.nom_res)
         return sidecar

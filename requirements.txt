@@ -7,7 +7,7 @@ cloudpickle==1.6.0
 dask>=2021.3.0
 distributed==2.30.0
 filelock==3.0.12
-Fiona==1.8.17
+Fiona>=1.8.17
 geopandas==0.8.1
 HeapDict==1.0.1
 msgpack==1.0.0

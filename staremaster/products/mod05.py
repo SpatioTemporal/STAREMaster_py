@@ -1,6 +1,4 @@
-import staremaster.conversions
 from staremaster.products.hdfeos import HDFeos
-from staremaster.sidecar import Sidecar
 
 
 class MOD05(HDFeos):
