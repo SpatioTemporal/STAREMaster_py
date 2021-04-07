@@ -5,7 +5,7 @@ click-plugins==1.1.1
 cligj==0.7.0
 cloudpickle==1.6.0
 dask>=2021.3.0
-distributed==2.30.0
+distributed>=2021.3.0
 filelock==3.0.12
 Fiona>=1.8.17
 geopandas==0.8.1

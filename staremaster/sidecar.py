@@ -19,6 +19,14 @@ class Sidecar:
         with netCDF4.Dataset(self.file_path, "w", format="NETCDF4") as rootgrp:
             pass
         
+    def write_dimension(self, name, length, group=None):
+        with netCDF4.Dataset(self.file_path , 'a', format="NETCDF4") as rootgrp:
+            if group:
+                grp = rootgrp.createGroup(group)
+            else:
+                grp = rootgrp
+            grp.createDimension(name, length)
+        
     def write_dimensions(self, i, j, l, nom_res=None, group=None):
         i_name = 'i'
         j_name = 'j'

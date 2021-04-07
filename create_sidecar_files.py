@@ -32,6 +32,8 @@ def create_sidecar(file_path, workers, product, cover_res, out_path, archive):
         granule = staremaster.products.VJ103DNB(file_path)
     elif product == 'CLDMSK_L2_VIIRS':
         granule = staremaster.products.CLMDKS_L2_VIIRS(file_path)
+    elif product == 'SSMIS':
+        granule = staremaster.products.SSMIS(file_path)
     else:        
         print('product not supported')
         print('supported products are {}'.format(get_installed_products()))
@@ -50,8 +52,9 @@ def list_graunles(folder, product):
     if not product:
         product = ''
     
+    
     files = glob.glob(folder + '/*')
-    pattern = '.*{product}.*[^_stare]\.(nc|hdf)'.format(product=product)
+    pattern = '.*{product}.*[^_stare]\.(nc|hdf|HDF5)'.format(product=product.upper())
     granules = list(filter(re.compile(pattern).match, files))        
     return granules
 
@@ -68,8 +71,12 @@ def guess_product(file_path):
         product = 'VNP02DNB'
     elif ('CLDMSK_L2_VIIRS' in file_path and '.nc' in file_name):
         product = 'CLDMSK_L2_VIIRS'        
+    elif ('SSMIS' in file_path and '.HDF5' in file_name):
+        product = 'SSMIS'
     else:
         product = None
+        print('could not determine product for {}'.format(file_path))
+        quit()
     return product
         
         
@@ -110,7 +117,7 @@ if __name__ == '__main__':
     parser.add_argument('--cover_res', metavar='cover_res', type=int, 
                         help='max STARE resolution of the cover. Default: min resolution of iFOVs')    
     parser.add_argument('--workers', metavar='n_workers', type=int, 
-                        help='use n_workers (local) dask workers')
+                        help='use n_workers (local) dask workers', default=1)
     parser.add_argument('--archive', metavar='archive',  type=str, 
                         help='''Create sidecars only for granules not listed in the archive file. 
                         Record all create sidecars and their corresponding granules in it.''')

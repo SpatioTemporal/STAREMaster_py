@@ -2,14 +2,20 @@ import xarray
 import dask
 import pystare
 import numpy
+import distributed
+
+# This is a workaround for https://github.com/dask/distributed/issues/4168
+import multiprocessing.popen_spawn_posix
 
 
-def latlon2stare_dask(lats, lons, resolution, workers, adapt_resolution=True):
+def latlon2stare_dask(lats, lons, resolution=None, workers=1, adapt_resolution=True):
     # should probably make chunk size dependent on the number of workers and lat/lon dimensions
+    if resolution:
+        adapt_resolution = False
     chunk_size = 500 
     lat_x = xarray.DataArray(lats, dims=['x', 'y']).chunk({'x': chunk_size})
     lon_x = xarray.DataArray(lons, dims=['x', 'y']).chunk({'x': chunk_size})
-    with dask.distributed.Client(n_workers=workers) as client:            
+    with distributed.Client(n_workers=workers) as client:            
         sids = xarray.apply_ufunc(pystare.from_latlon2D,
                                   lat_x,
                                   lon_x,
@@ -19,7 +25,7 @@ def latlon2stare_dask(lats, lons, resolution, workers, adapt_resolution=True):
         return numpy.array(sids)
     
 
-def latlon2stare(lats, lons, resolution=27, workers=None, adapt_resolution=True):    
+def latlon2stare(lats, lons, resolution=None, workers=None, adapt_resolution=True):    
     if workers:
         sids = latlon2stare_dask(lats, lons, resolution, workers, adapt_resolution)
     else: 
@@ -35,11 +41,50 @@ def gring2cover(lats, lons, level):
 
 
 def sids2cover(sids):
-    return None
+    return dissolve()
 
 
 def min_level(sids):
     return int(pystare.spatial_resolution(sids).min())
 
+
 def max_level(sids):
     return int(pystare.spatial_resolution(sids).max())
+
+
+def expand(sids):
+    s_range = pystare.to_compressed_range(sids)
+    expanded = pystare.expand_intervals(s_range  , -1, multi_resolution=True)
+    return expanded 
+
+
+def dissolve(sids, n_workers=1, n_chunks=1):
+    sids = pystare.spatial_clear_to_resolution(sids)
+    
+    if isinstance(sids, list):
+        dissolved = list(set(sids))
+    elif isinstance(sids, numpy.ndarray):
+        dissolved = numpy.unique(sids)
+    else:
+        return
+    
+    if n_workers==1 and n_chunks==1:
+        dissolved = expand(dissolved)            
+    else:
+        dissolved = numpy.array_split(dissolved, n_workers)
+        if n_workers > 1:
+            with multiprocessing.Pool(processes=n_workers) as pool:
+                dissolved = pool.map(dissolve, dissolved)
+        else:
+            dissolved = []
+            for chunk in dissolved:
+                dissolved.append(staremaster.conversions.dissolve(chunk))            
+        dissolved = numpy.concatenate(dissolved)
+        dissolved = numpy.unique(dissolved )
+        dissolved = expand(dissolved)
+        
+    return dissolved
+        
+    
+    
+
