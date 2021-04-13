@@ -10,7 +10,6 @@ import xml.etree.ElementTree as ET
 import argparse
 import netCDF4
 
-
 def companion_missing(granule_name, companion_names, granule_pattern, companion_pattern):
     name_trunk = granule_name.split('.')[0:-1] #only remove .nc
     pattern = '.'.join(name_trunk) + companion_pattern #create full file name with _stare.nc
@@ -56,7 +55,6 @@ if __name__ == '__main__':
     parser.add_argument('--companion_folder', type=str, help='Companion folder (e.g. location of *_stare.nc). Default: granule_folder')
     parser.add_argument('--granule_pattern', type=str, help='Pattern of the granule name (e.g. VNP02DNB, VNP03DNB, or CLDMSK)', required=True)
     parser.add_argument('--companion_pattern', type=str, help='Pattern of the companion name (e.g _stare.nc)', required=True)
-    
     args = parser.parse_args()
    
     if args.companion_folder is None:
@@ -70,3 +68,5 @@ if __name__ == '__main__':
     missing_variables = find_missing_variables(companion_folder=args.companion_folder, companion_pattern=args.companion_pattern)
     
     print('{n} files are missing variables'.format(n=len(missing_variables)))
+
+
