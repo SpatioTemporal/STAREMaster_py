@@ -18,11 +18,21 @@ we then can install STAREMaster_py with
 
     pip3 install -e STAREMaster_py/
 
-    
-## Conda
+## pyhdf issues
+
+Installing pyhdf from pip does not always seem to be trivially possible. 
+Simple workaround is using conda;
 
     conda create --name staremaster
     conda activate staremaster
+    conda install -c conda-forge pyhdf
+
+Then:
+
+    pip3 install -e STAREMaster_py/
+    
+
+    
     
 
 

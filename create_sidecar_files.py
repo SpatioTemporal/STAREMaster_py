@@ -52,7 +52,6 @@ def list_graunles(folder, product):
     if not product:
         product = ''
     
-    
     files = glob.glob(folder + '/*')
     pattern = '.*{product}.*[^_stare]\.(nc|hdf|HDF5)'.format(product=product.upper())
     granules = list(filter(re.compile(pattern).match, files))        
@@ -112,7 +111,7 @@ if __name__ == '__main__':
     parser.add_argument('--out_path', metavar='out_path',  type=str, 
                         help='the folder to create sidecars in; default: next to granule')
     parser.add_argument('--product', metavar='product', type=str, 
-                        help='product (e.g. cldmsk_l2_viirs, hdfeos, l2_viirs, mod05, mod09, vj102dnb, vj103dnb, vnp02dnb, vnp03dnb, xcal1C_ssmi)',
+                        help='product (e.g. cldmsk_l2_viirs, hdfeos, l2_viirs, mod05, mod09, vj102dnb, vj103dnb, vnp02dnb, vnp03dnb, ssmi)',
                         choices=installed_products, default=None)
     parser.add_argument('--cover_res', metavar='cover_res', type=int, 
                         help='max STARE resolution of the cover. Default: min resolution of iFOVs')    
@@ -143,7 +142,7 @@ if __name__ == '__main__':
 
     if args.parallel_files:
         map_args = zip(file_paths, 
-                       itertools.repeat(None),
+                       itertools.repeat(1),
                        itertools.repeat(args.product),
                        itertools.repeat(args.out_path),
                        itertools.repeat(args.cover_res),
