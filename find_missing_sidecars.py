@@ -11,8 +11,12 @@ import argparse
 import netCDF4
 import sys
 
+<<<<<<< HEAD
 
 def companion_missing(granule_name, companion_names, granule_pattern):
+=======
+def companion_missing(granule_name, companion_names, granule_pattern, companion_pattern):
+>>>>>>> 5719745a12bbec4a53f6a27d95d329f6dd463a53
     name_trunk = granule_name.split('.')[0:-1] #only remove .nc
     pattern = '.'.join(name_trunk) + _stare.nc #create full file name with _stare.nc
     companion_name = fnmatch.filter(companion_names, pattern)
@@ -58,8 +62,7 @@ if __name__ == '__main__':
     parser.add_argument('--granule_folder', type=str, help='Granule folder (e.g. location of VNP02DNB, VNP03DNB, or CLDMSK)', required=True)
     parser.add_argument('--companion_folder', type=str, help='Companion folder (e.g. location of *_stare.nc). Default: granule_folder')
     parser.add_argument('--granule_pattern', type=str, help='Pattern of the granule name (e.g. VNP02DNB, VNP03DNB, or CLDMSK)', required=True)
-
-    
+    parser.add_argument('--companion_pattern', type=str, help='Pattern of the companion name (e.g _stare.nc)', required=True)
     args = parser.parse_args()
    
     if args.companion_folder is None:
@@ -74,3 +77,5 @@ if __name__ == '__main__':
     missing_variables = find_missing_variables(companion_folder=args.companion_folder)
     
     print('{n} files are missing variables'.format(n=len(missing_variables)))
+
+
