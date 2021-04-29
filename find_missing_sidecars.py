@@ -10,72 +10,81 @@ import xml.etree.ElementTree as ET
 import argparse
 import netCDF4
 import sys
+import re
+import pandas
 
-<<<<<<< HEAD
 
-def companion_missing(granule_name, companion_names, granule_pattern):
-=======
-def companion_missing(granule_name, companion_names, granule_pattern, companion_pattern):
->>>>>>> 5719745a12bbec4a53f6a27d95d329f6dd463a53
-    name_trunk = granule_name.split('.')[0:-1] #only remove .nc
-    pattern = '.'.join(name_trunk) + _stare.nc #create full file name with _stare.nc
-    companion_name = fnmatch.filter(companion_names, pattern)
-    if len(companion_name) == 0:
-        return True
+def get_granule_paths(folder, granule_pattern):
+    granule_paths = sorted(glob.glob(os.path.expanduser(folder) + '/' + '*' ))
+    pattern = '.*/{}.*[^_stare]\.(nc|hdf|HDF5)'.format(granule_pattern)
+    granule_paths = list(filter(re.compile(pattern).match, granule_paths))        
+    return granule_paths
 
-def get_lonely_granules(granule_folder, companion_folder, granule_pattern):
-    granule_names = []
-    for file in glob.glob(os.path.expanduser(granule_folder) + granule_pattern + '*'):
-        if file[-8:] != 'stare.nc':
-            granule_names.append(file) #filter out stare files from granule
-    granule_names = sorted(granule_names)    
-    companion_names = sorted(glob.glob(os.path.expanduser(companion_folder) + '*' + '_stare.nc')) #switched wildcard order to call stare files
-    missing = []
-    for granule_name in granule_names:
-        if companion_missing(granule_name, companion_names, granule_pattern):
-            granule_name = granule_name.split('/')[-1]            
-            missing.append(granule_name)
-            print('missing companion for: ' + granule_name)
+
+def get_sidecar_paths(folder, granule_pattern):
+    sidecar_paths = sorted(glob.glob(os.path.expanduser(folder) + '/' + '*' ))
+    pattern = '.*/{}.*_stare\.(nc|hdf|HDF5)'.format(granule_pattern)
+    sidecar_paths = list(filter(re.compile(pattern).match, sidecar_paths))       
+    return sidecar_paths
+
+
+def get_lonely_granules(granules, sidecars):    
+    sidecars = [name.replace('_stare', '') for name in sidecars]
+    missing = list(set(granules) - set(sidecars))
     return missing
+    
 
-def missing_variable(netcdf):
-    variable_base = ['Longitude', 'Latitude', 'STARE_index', 'STARE_cover']
-    for i in variable_base:
-        name = [key for key in netcdf.variables.keys() if i in key]
-        if len(name) == 0:
+def missing_variable(keys):
+    keys = ';'.join(list(keys))
+    variables = ['Longitude', 'Latitude', 'STARE_index', 'STARE_cover']
+    for variable in variables:         
+        if variable not in keys:            
             return True
+    return False
         
 
-def find_missing_variables(companion_folder):
-    companion_names = sorted(glob.glob(os.path.expanduser(companion_folder) + '*' + '_stare.nc')) #switched wildcard order to call stare files
-    missing = []
-    for companion_name in companion_names:
-        netcdf = netCDF4.Dataset(companion_name, 'r', format = 'NETCDF4')
-        if missing_variable(netcdf):
-            companion_name = companion_name.split('/')[-1]
-            missing.append(companion_name)
-    return missing
+def find_broken(sidecars):
+    broken = []
+    for sidecar in sidecars:
+        netcdf = netCDF4.Dataset(sidecar, 'r', format = 'NETCDF4')
+        keys = netcdf.variables.keys()
+        if missing_variable(keys):
+            print('b')
+            broken.append(sidecar)
+    return broken
 
         
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Finds and retrieves missing geolocation companion files')
+    parser = argparse.ArgumentParser(description='Finds and retrieves missing stare sidecar files')
     parser.add_argument('--granule_folder', type=str, help='Granule folder (e.g. location of VNP02DNB, VNP03DNB, or CLDMSK)', required=True)
-    parser.add_argument('--companion_folder', type=str, help='Companion folder (e.g. location of *_stare.nc). Default: granule_folder')
-    parser.add_argument('--granule_pattern', type=str, help='Pattern of the granule name (e.g. VNP02DNB, VNP03DNB, or CLDMSK)', required=True)
-    parser.add_argument('--companion_pattern', type=str, help='Pattern of the companion name (e.g _stare.nc)', required=True)
+    parser.add_argument('--sidecar_folder', type=str, help='Companion folder (e.g. location of *_stare.nc). Default: granule_folder', required=False)
+    parser.add_argument('--granule_pattern', type=str, help='Pattern of the granule name (e.g. VNP02DNB, VNP03DNB, or CLDMSK)', required=False, default='')
+    parser.add_argument('--find_broken', help='toggle if sidecars should be checked for completion', action='store_true')
+    parser.add_argument('--out', help='file to write missing file names to')
+    
     args = parser.parse_args()
    
-    if args.companion_folder is None:
-        args.companion_folder = args.granule_folder 
+    if args.sidecar_folder is None:
+        args.sidecar_folder = args.granule_folder 
         
-    lonely_granules = get_lonely_granules(granule_folder=args.granule_folder, companion_folder=args.companion_folder, 
-                                          granule_pattern=args.granule_pattern)
     
+    granules = get_granule_paths(folder=args.granule_folder, granule_pattern=args.granule_pattern)
+    sidecars = get_sidecar_paths(folder=args.sidecar_folder, granule_pattern=args.granule_pattern)
     
-    print('{n} missing companions'.format(n=len(lonely_granules)))
+    print('{} granules'.format(len(granules)))
+    print('{} sidecars'.format(len(sidecars)))
     
-    missing_variables = find_missing_variables(companion_folder=args.companion_folder)
+    missing = get_lonely_granules(granules, sidecars)
+    print('{} missing'.format(len(missing)))
     
-    print('{n} files are missing variables'.format(n=len(missing_variables)))
+    if args.find_broken:    
+        broken = find_broken(sidecars)
+        missing = missing + broken
+        
+    print('{} broken'.format(len(broken)))
+    
+    if args.out:    
+        pandas.Series(missing).to_csv(args.out, index=False, header=False)
+    
 
 

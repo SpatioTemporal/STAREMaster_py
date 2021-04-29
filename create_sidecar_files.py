@@ -11,7 +11,7 @@ import importlib
 import re
 
 
-def create_sidecar(file_path, workers, product, cover_res, out_path, archive):
+def create_sidecar(file_path, n_workers, product, cover_res, out_path, archive):
 
     if product is None:
         product = guess_product(file_path)
@@ -39,7 +39,7 @@ def create_sidecar(file_path, workers, product, cover_res, out_path, archive):
         print('supported products are {}'.format(get_installed_products()))
         quit()
         
-    sidecar = granule.create_sidecar(workers, cover_res, out_path)
+    sidecar = granule.create_sidecar(n_workers, cover_res, out_path)
         
     if archive:
         with filelock.FileLock(archive + '.lock.'):        
@@ -152,7 +152,7 @@ if __name__ == '__main__':
     else:
         for file_path in file_paths:
             create_sidecar(file_path=file_path,
-                           workers=args.workers,
+                           n_workers=args.workers,
                            product=args.product, 
                            out_path=args.out_path,
                            cover_res=args.cover_res,
