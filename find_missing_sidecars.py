@@ -49,8 +49,8 @@ def find_broken(sidecars):
         netcdf = netCDF4.Dataset(sidecar, 'r', format = 'NETCDF4')
         keys = netcdf.variables.keys()
         if missing_variable(keys):
-            print('b')
-            broken.append(sidecar)
+            granule = sidecar.replace('_stare', '')
+            broken.append(granule)
     return broken
 
         
@@ -60,7 +60,8 @@ if __name__ == '__main__':
     parser.add_argument('--sidecar_folder', type=str, help='Companion folder (e.g. location of *_stare.nc). Default: granule_folder', required=False)
     parser.add_argument('--granule_pattern', type=str, help='Pattern of the granule name (e.g. VNP02DNB, VNP03DNB, or CLDMSK)', required=False, default='')
     parser.add_argument('--find_broken', help='toggle if sidecars should be checked for completion', action='store_true')
-    parser.add_argument('--out', help='file to write missing file names to')
+    parser.add_argument('--archive', help='write an archive file out containing all granule-sidecar pairs')
+    parser.add_argument('--out', help='file to write granules without sidecar')
     
     args = parser.parse_args()
    
@@ -79,12 +80,19 @@ if __name__ == '__main__':
     
     if args.find_broken:    
         broken = find_broken(sidecars)
-        missing = missing + broken
-        
-    print('{} broken'.format(len(broken)))
+        missing = missing + broken        
+        print('{} broken'.format(len(broken)))
     
     if args.out:    
         pandas.Series(missing).to_csv(args.out, index=False, header=False)
-    
-
-
+        
+    if args.archive:
+        good_sidecars = []
+        good_granules = list(set(granules) - set(missing))
+        for granule in good_granules:
+            sidecar = '.'.join(granule.split('.')[0:-1]) + '_stare.' + granule.split('.')[-1]
+            good_sidecars.append(sidecar)
+        df = pandas.DataFrame({'granule': good_granules, 'sidecar': good_sidecars})
+        df.to_csv(args.archive, header=False, index=False)
+        
+        
