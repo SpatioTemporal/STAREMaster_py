@@ -32,8 +32,7 @@ Then:
     pip3 install -e STAREMaster_py/
     
 
-    
-    
+
 
 
 # Requirements
