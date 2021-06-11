@@ -34,6 +34,8 @@ def create_sidecar(file_path, n_workers, product, cover_res, out_path, archive):
         granule = staremaster.products.CLMDKS_L2_VIIRS(file_path)
     elif product == 'SSMIS':
         granule = staremaster.products.SSMIS(file_path)
+    elif product == 'ATMS':
+        granule = staremaster.products.ATMS(file_path)
     else:        
         print('product not supported')
         print('supported products are {}'.format(get_installed_products()))
@@ -72,6 +74,8 @@ def guess_product(file_path):
         product = 'CLDMSK_L2_VIIRS'        
     elif ('SSMIS' in file_path and '.HDF5' in file_name):
         product = 'SSMIS'
+    elif ('ATMS' in file_path and '.HDF5' in file_name):
+        product = 'ATMS'
     else:
         product = None
         print('could not determine product for {}'.format(file_path))

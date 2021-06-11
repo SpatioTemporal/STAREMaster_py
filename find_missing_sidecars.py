@@ -4,7 +4,6 @@ import requests
 import time
 import glob
 import os
-import fnmatch
 import xml
 import xml.etree.ElementTree as ET
 import argparse
