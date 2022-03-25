@@ -16,7 +16,7 @@ def latlon2stare_dask(lats, lons, resolution=None, n_workers=1, adapt_resolution
     lat_x = xarray.DataArray(lats, dims=['x', 'y']).chunk({'x': chunk_size})
     lon_x = xarray.DataArray(lons, dims=['x', 'y']).chunk({'x': chunk_size})
     with distributed.Client(n_workers=n_workers) as client:            
-        sids = xarray.apply_ufunc(pystare.from_latlon2D,
+        sids = xarray.apply_ufunc(pystare.from_latlon_2d,
                                   lat_x,
                                   lon_x,
                                   dask='parallelized',
@@ -25,11 +25,11 @@ def latlon2stare_dask(lats, lons, resolution=None, n_workers=1, adapt_resolution
         return numpy.array(sids)
     
 
-def latlon2stare(lats, lons, resolution=None, n_workers=1, adapt_resolution=True):    
+def latlon2stare(lats, lons, resolution=None, n_workers=1, adapt_resolution=True):        
     if n_workers>1:
         sids = latlon2stare_dask(lats, lons, resolution, n_workers, adapt_resolution)
     else: 
-        sids = pystare.from_latlon2D(lats, lons, resolution, adapt_resolution)
+        sids = pystare.from_latlon_2d(lats, lons, resolution, adapt_resolution)
     return sids
 
 
