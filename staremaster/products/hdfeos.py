@@ -52,17 +52,16 @@ class HDFeos:
         for key in keys:    
             string = self.hdf.attributes()[key]
             m = parse_hdfeos_metadata(string)
-            metadata_group  = {**metadata_group, **m}    
+            metadata_group = {**metadata_group, **m}
         return metadata_group
     
     def create_sidecar(self, n_workers, cover_res, out_path):
-            
         sids = staremaster.conversions.latlon2stare(self.lats,
                                                     self.lons,
-                                                    level=-1,
+                                                    level=None,
                                                     n_workers=n_workers,
-                                                    adapt_level=True)
-        
+                                                    adapt_resolution=True)
+
         if not cover_res:
             cover_res = staremaster.conversions.min_level(sids)
             

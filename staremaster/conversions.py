@@ -24,11 +24,12 @@ def latlon2stare_dask(lats, lons, level=None, n_workers=1, adapt_level=True):
         return numpy.array(sids)
     
 
-def latlon2stare(lats, lons, level=None, n_workers=1, adapt_level=True):
-    if n_workers > 1:
-        sids = latlon2stare_dask(lats, lons, level, n_workers, adapt_level)
+
+def latlon2stare(lats, lons, resolution=None, n_workers=1, adapt_resolution=True):        
+    if n_workers>1:
+        sids = latlon2stare_dask(lats, lons, resolution, n_workers, adapt_resolution)
     else: 
-        sids = pystare.from_latlon_2d(lats, lons, level, adapt_level)
+        sids = pystare.from_latlon_2d(lats, lons, resolution, adapt_resolution)
     return sids
 
 

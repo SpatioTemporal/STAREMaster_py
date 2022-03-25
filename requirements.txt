@@ -22,7 +22,7 @@ python-dateutil==2.8.1
 pytz>=2020.4
 pystare>0.5.5
 PyYAML>=5.4.1
-Shapely==1.7.1
+Shapely>=1.8
 six>=1.15.0
 sortedcontainers==2.2.2
 tblib==1.7.0
