@@ -1,42 +1,41 @@
 import xarray
-import dask
 import pystare
 import numpy
 import distributed
 
 # This is a workaround for https://github.com/dask/distributed/issues/4168
-import multiprocessing.popen_spawn_posix
+#import multiprocessing.popen_spawn_posix
 
 
-def latlon2stare_dask(lats, lons, resolution=None, n_workers=1, adapt_resolution=True):
+def latlon2stare_dask(lats, lons, level=None, n_workers=1, adapt_level=True):
     # should probably make chunk size dependent on the number of workers and lat/lon dimensions
-    if resolution:
-        adapt_resolution = False
+    if level:
+        adapt_level = False
     chunk_size = 500 
     lat_x = xarray.DataArray(lats, dims=['x', 'y']).chunk({'x': chunk_size})
     lon_x = xarray.DataArray(lons, dims=['x', 'y']).chunk({'x': chunk_size})
     with distributed.Client(n_workers=n_workers) as client:            
-        sids = xarray.apply_ufunc(pystare.from_latlon2D,
+        sids = xarray.apply_ufunc(pystare.from_latlon_2d,
                                   lat_x,
                                   lon_x,
                                   dask='parallelized',
-                                  kwargs={'adapt_resolution': adapt_resolution, 'resolution': resolution},
+                                  kwargs={'adapt_level': adapt_level, 'level': level},
                                   output_dtypes=[numpy.int64])
         return numpy.array(sids)
     
 
-def latlon2stare(lats, lons, resolution=None, n_workers=1, adapt_resolution=True):    
-    if n_workers>1:
-        sids = latlon2stare_dask(lats, lons, resolution, n_workers, adapt_resolution)
+def latlon2stare(lats, lons, level=None, n_workers=1, adapt_level=True):
+    if n_workers > 1:
+        sids = latlon2stare_dask(lats, lons, level, n_workers, adapt_level)
     else: 
-        sids = pystare.from_latlon2D(lats, lons, resolution, adapt_resolution)
+        sids = pystare.from_latlon_2d(lats, lons, level, adapt_level)
     return sids
 
 
 def gring2cover(lats, lons, level): 
     lats = numpy.array(lats)
     lons = numpy.array(lons)
-    sids = pystare.to_nonconvex_hull_range_from_latlon(lats, lons, int(level))
+    sids = pystare.cover_from_hull(lats, lons, int(level))
     return sids 
 
 
@@ -62,7 +61,7 @@ def merge_stare(sids, dissolve_sids=True, n_workers=1, n_chunks=1):
     sids = pystare.spatial_clear_to_resolution(sids)
     dissolved = numpy.unique(sids)
     
-    if dissolve_sids==False:
+    if not dissolve_sids:
         return dissolved
     
     if n_workers==1 and n_chunks==1:

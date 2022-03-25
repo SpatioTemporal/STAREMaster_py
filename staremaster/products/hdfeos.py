@@ -55,9 +55,13 @@ class HDFeos:
             metadata_group  = {**metadata_group, **m}    
         return metadata_group
     
-    def create_sidecar(self,workers, cover_res, out_path):        
+    def create_sidecar(self, n_workers, cover_res, out_path):
             
-        sids = staremaster.conversions.latlon2stare(self.lats, self.lons, resolution=-1, workers=workers, adapt_resolution=True)
+        sids = staremaster.conversions.latlon2stare(self.lats,
+                                                    self.lons,
+                                                    level=-1,
+                                                    n_workers=n_workers,
+                                                    adapt_level=True)
         
         if not cover_res:
             cover_res = staremaster.conversions.min_level(sids)
