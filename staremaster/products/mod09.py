@@ -52,6 +52,12 @@ class MOD09(HDFeos):
             lat_500_g = numpy.append(lat_500_g, [lat_final], axis=0)
             lon_500_g = numpy.append(lon_500_g, [lon_final], axis=0)
 
+            lat_final_y = lat_500_g[:, -1] + numpy.gradient(lat_500_g)[1][:, -1]  # Last scan
+            lat_500_g = numpy.append(lat_500_g.T, [lat_final_y], axis=0).T
+
+            lon_final_y = lon_500_g[:, -1] + numpy.gradient(lon_500_g)[1][:, -1]  # Last scan
+            lon_500_g = numpy.append(lon_500_g.T, [lon_final_y], axis=0).T
+
             lat_500.append(lat_500_g)
             lon_500.append(lon_500_g)
 
