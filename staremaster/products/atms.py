@@ -1,6 +1,6 @@
-from staremaster.products.ssmis import SSMIS
+from staremaster.products.xcal import XCAL
 
 
+class ATMS(XCAL):
+    scans = ['S1', 'S2', 'S3', 'S4']
 
-class ATMS(SSMIS):
-    pass

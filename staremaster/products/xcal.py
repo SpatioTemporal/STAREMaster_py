@@ -33,7 +33,7 @@ class XCAL:
 
             if not cover_res:
                 # Need to drop the resolution to make the cover less sparse
-                cover_res = staremaster.conversions.min_level(sids)
+                cover_res = staremaster.conversions.min_resolution(sids)
                 cover_res = cover_res - 2
 
             sids_adapted = pystare.spatial_coerce_resolution(sids, cover_res)

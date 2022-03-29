@@ -21,13 +21,12 @@ class L2_VIIRS:
     def read_gring(self):        
         self.gring_lats = self.netcdf.GRingPointLatitude[::-1]
         self.gring_lons = self.netcdf.GRingPointLongitude[::-1]
-         
 
     def create_sidecar(self, n_workers=1, cover_res=None, out_path=None):
-        sids = staremaster.conversions.latlon2stare(lats=self.lats, lons=self.lons, resolution=-1, n_workers=n_workers, adapt_resolution=True)    
+        sids = staremaster.conversions.latlon2stare(lats=self.lats, lons=self.lons, level=-1, n_workers=n_workers, adapt_resolution=True)
         
         if not cover_res:
-            cover_res = staremaster.conversions.min_level(sids)
+            cover_res = staremaster.conversions.min_resolution(sids)
             
         cover_sids = staremaster.conversions.gring2cover(self.gring_lats, self.gring_lons, cover_res)
         

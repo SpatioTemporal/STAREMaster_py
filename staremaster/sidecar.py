@@ -13,7 +13,7 @@ class Sidecar:
         if out_path:
             return out_path + '.'.join(granule_path.split('/')[-1].split('.')[0:-1]) + '_stare.nc'
         else:
-            return  '.'.join(granule_path.split('.')[0:-1]) + '_stare.nc'
+            return '.'.join(granule_path.split('.')[0:-1]) + '_stare.nc'
         
     def create(self):
         with netCDF4.Dataset(self.file_path, "w", format="NETCDF4") as rootgrp:
@@ -30,31 +30,29 @@ class Sidecar:
     def write_dimensions(self, i, j, l, nom_res=None, group=None):
         i_name = 'i'
         j_name = 'j'
-        l_name = 'l'
         if nom_res:
             i_name += '_{nom_res}'.format(nom_res=nom_res)
             j_name += '_{nom_res}'.format(nom_res=nom_res)
-            l_name += '_{nom_res}'.format(nom_res=nom_res)
-        with netCDF4.Dataset(self.file_path , 'a', format="NETCDF4") as rootgrp:
+        with netCDF4.Dataset(self.file_path, 'a', format="NETCDF4") as rootgrp:
             if group:
                 grp = rootgrp.createGroup(group)
             else:
                 grp = rootgrp
             grp.createDimension(i_name, i)
             grp.createDimension(j_name, j)
-            grp.createDimension(l_name, l)
+
 
     def write_lons(self, lons, nom_res=None, group=None):
         i = lons.shape[0]
         j = lons.shape[1]
         varname = 'Longitude'
-        i_name ='i'
+        i_name = 'i'
         j_name = 'j'
         if nom_res:
             varname += '_{nom_res}'.format(nom_res=nom_res)
             i_name += '_{nom_res}'.format(nom_res=nom_res)
             j_name += '_{nom_res}'.format(nom_res=nom_res)
-        with netCDF4.Dataset(self.file_path , 'a', format="NETCDF4") as rootgrp:
+        with netCDF4.Dataset(self.file_path, 'a', format="NETCDF4") as rootgrp:
             if group:
                 grp = rootgrp.createGroup(group)
             else:
@@ -104,7 +102,7 @@ class Sidecar:
             varname += '_{nom_res}'.format(nom_res=nom_res)
             i_name += '_{nom_res}'.format(nom_res=nom_res)
             j_name += '_{nom_res}'.format(nom_res=nom_res)   
-        with netCDF4.Dataset(self.file_path , 'a', format="NETCDF4") as rootgrp:
+        with netCDF4.Dataset(self.file_path, 'a', format="NETCDF4") as rootgrp:
             if group:
                 grp = rootgrp.createGroup(group)
             else:
@@ -118,19 +116,17 @@ class Sidecar:
             sids_netcdf.long_name = 'SpatioTemporal Adaptive Resolution Encoding (STARE) index'
             sids_netcdf[:, :] = sids
 
-
     def write_cover(self, cover, nom_res=None, group=None):
         l = cover.size
         varname = 'STARE_cover'
         l_name = 'l'
-        if nom_res:
-            varname += '_{nom_res}'.format(nom_res=nom_res)
-            l_name += '_{nom_res}'.format(nom_res=nom_res)
-        with netCDF4.Dataset(self.file_path , 'a', format="NETCDF4") as rootgrp:
+
+        with netCDF4.Dataset(self.file_path, 'a', format="NETCDF4") as rootgrp:
             if group:
                 grp = rootgrp.createGroup(group)
             else:
-                grp = rootgrp 
+                grp = rootgrp
+            grp.createDimension(l_name, l)
             cover_netcdf = grp.createVariable(varname=varname, 
                                               datatype='u8', 
                                               dimensions=(l_name),

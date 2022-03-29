@@ -7,3 +7,5 @@ from staremaster.products.vj103dnb import VJ103DNB
 from staremaster.products.cldmsk_l2_viirs import CLMDKS_L2_VIIRS
 from staremaster.products.ssmis import SSMIS
 from staremaster.products.atms import ATMS
+from staremaster.products.amsr import AMSR
+from staremaster.products.imerg import IMERG

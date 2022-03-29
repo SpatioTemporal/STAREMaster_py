@@ -35,17 +35,15 @@ def parse_hdfeos_metadata(string):
 class HDFeos:
     
     def __init__(self, file_path):
-        self.lats = None
-        self.lons = None
+        self.lats = {}
+        self.lons = {}
         self.gring_lats = None
         self.gring_lons = None
         self.hdf = SD(file_path)
         self.file_path = file_path
-        
-    def read_laton(self):
-        self.lons = self.hdf.select('Longitude').get().astype(numpy.double)
-        self.lats = self.hdf.select('Latitude').get().astype(numpy.double)
-        
+        self.nom_res = []
+        self.sids = {}
+
     def get_metadata_group(self, group_name):
         metadata_group = {}
         keys = [s for s in self.hdf.attributes().keys() if group_name in s]
@@ -56,26 +54,29 @@ class HDFeos:
         return metadata_group
     
     def create_sidecar(self, n_workers, cover_res, out_path):
-        sids = staremaster.conversions.latlon2stare(self.lats,
-                                                    self.lons,
-                                                    level=None,
-                                                    n_workers=n_workers,
-                                                    adapt_resolution=True)
+        for res in self.nom_res:
+            self.sids[res] = staremaster.conversions.latlon2stare(self.lats[res],
+                                                                  self.lons[res],
+                                                                  resolution=None,
+                                                                  n_workers=n_workers,
+                                                                  adapt_resolution=True)
 
         if not cover_res:
-            cover_res = staremaster.conversions.min_level(sids)
+            cover_res = staremaster.conversions.min_resolution(self.sids[self.nom_res[0]])
             
         cover_sids = staremaster.conversions.gring2cover(self.gring_lats, self.gring_lons, cover_res)
-        
-        i = self.lats.shape[0]
-        j = self.lats.shape[1]
-        l = cover_sids.size
-        
+
         sidecar = Sidecar(self.file_path, out_path)
-        sidecar.write_dimensions(i, j, l, nom_res=self.nom_res)    
-        sidecar.write_lons(self.lons, nom_res=self.nom_res)
-        sidecar.write_lats(self.lats, nom_res=self.nom_res)
-        sidecar.write_sids(sids, nom_res=self.nom_res)
         sidecar.write_cover(cover_sids, nom_res=self.nom_res)
+
+        for res in self.nom_res:
+            i = self.lats[res].shape[0]
+            j = self.lats[res].shape[1]
+            l = cover_sids.size
+            sidecar.write_dimensions(i, j, l, nom_res=res)
+            sidecar.write_lons(self.lons[res], nom_res=res)
+            sidecar.write_lats(self.lats[res], nom_res=res)
+            sidecar.write_sids(self.sids[res], nom_res=res)
+
         return sidecar
 
