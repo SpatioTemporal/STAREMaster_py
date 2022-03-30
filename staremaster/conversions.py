@@ -8,10 +8,10 @@ import distributed
 # import multiprocessing.popen_spawn_posix
 
 
-def latlon2stare_dask(lats, lons, level=None, n_workers=1, adapt_level=True):
+def latlon2stare_dask(lats, lons, resolution=None, n_workers=1, adapt_resolution=True):
     # should probably make chunk size dependent on the number of workers and lat/lon dimensions
-    if level:
-        adapt_level = False
+    if resolution:
+        adapt_resolution = False
     chunk_size = 500
     lat_x = xarray.DataArray(lats, dims=['x', 'y']).chunk({'x': chunk_size})
     lon_x = xarray.DataArray(lons, dims=['x', 'y']).chunk({'x': chunk_size})
@@ -20,7 +20,8 @@ def latlon2stare_dask(lats, lons, level=None, n_workers=1, adapt_level=True):
                                   lat_x,
                                   lon_x,
                                   dask='parallelized',
-                                  kwargs={'adapt_level': adapt_level, 'level': level},
+                                  kwargs={'adapt_level': adapt_resolution,
+                                          'level': resolution},
                                   output_dtypes=[numpy.int64])
         return numpy.array(sids)
 
@@ -33,10 +34,10 @@ def latlon2stare(lats, lons, resolution=None, n_workers=1, adapt_resolution=True
     return sids
 
 
-def gring2cover(lats, lons, level):
+def gring2cover(lats, lons, resolution):
     lats = numpy.array(lats)
     lons = numpy.array(lons)
-    sids = pystare.cover_from_hull(lats, lons, int(level))
+    sids = pystare.cover_from_hull(lats, lons, int(resolution))
     return sids
 
 
