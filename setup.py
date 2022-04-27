@@ -25,7 +25,7 @@ scripts=['create_sidecar_files.py']
 
 
 setup(
-    name="STAREMaster_py",
+    name="staremaster",
     version='0.1',
     description="Create STARE sidecar files",
     license="MIT",
@@ -37,6 +37,7 @@ setup(
         "staremaster"
     ],
     scripts=scripts,
+    #entry_points={'console_scripts': ['create_sidecar_files=create_sidecar_files:main']},
     python_requires=">=3.5",
     install_requires=install_requires,
     test_suite='tests'
