@@ -26,7 +26,7 @@ scripts=['create_sidecar_files.py']
 
 setup(
     name="staremaster",
-    version='0.1',
+    version='0.1.1',
     description="Create STARE sidecar files",
     license="MIT",
     author="Niklas Griessbaum",

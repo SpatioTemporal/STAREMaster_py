@@ -30,7 +30,10 @@ class MOD09(HDFeos):
         lat_500 = []
         lon_500 = []
 
-        for group_start in range(0, 2030, 10):
+        # Turns out they are not always 2030, but somtimes 2040 scans
+        n_scans = self.lats['1km'].shape[0]
+
+        for group_start in range(0, n_scans, 10):
             group_lats = self.lats['1km'][group_start:group_start + 10]
             group_lons = self.lons['1km'][group_start:group_start + 10]
 

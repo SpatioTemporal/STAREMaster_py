@@ -30,3 +30,4 @@ toolz==0.11.1
 tornado==6.1
 xarray>=0.16.1
 zict==2.0.0
+scipy>=1.8
