@@ -12,7 +12,6 @@ import re
 def create_grid_sidecar(grid, out_path):
     if grid == 'IMERG':
         granule = staremaster.products.IMERG()
-        
     granule.create_sidecar(out_path)
 
 
