@@ -16,8 +16,8 @@ def parse_hdfeos_metadata(string):
         else:
             lines.append(line)
     i = -1
-    while i<(len(lines))-1:        
-        i+=1
+    while i < (len(lines))-1:
+        i += 1
         line = lines[i]
         if "=" in line:
             key = line.split('=')[0]
@@ -62,6 +62,7 @@ class HDFeos:
                                                                   adapt_resolution=True)
 
         if not cover_res:
+            # If we didn't get a cover resolution, we take the minimum of the iFOV resolutions
             cover_res = staremaster.conversions.min_resolution(self.sids[self.nom_res[0]])
             
         cover_sids = staremaster.conversions.gring2cover(self.gring_lats, self.gring_lons, cover_res)

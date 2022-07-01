@@ -5,24 +5,28 @@ import os
 from staremaster.sidecar import Sidecar
 
 
-class IMERG:
+class satCORPS:
     
     def __init__(self):
-        ## IMERG is a gridded dataset on a 0.05 degree grid
+        ## satCORPS is a gridded dataset on a 0.05 degree grid
         self.lats = None
         self.lons = None
         self.make_latlon()
         self.nom_res = ''
         
     def make_latlon(self):
-        self.lats = numpy.ascontiguousarray(numpy.tile(numpy.arange(-89.95, 90, 0.1), (3600, 1)).transpose())
-        self.lons = numpy.tile(numpy.arange(-179.95, 180, 0.1), (1800, 1))
+        nlat = 6660   # Lines
+        nlon = 13320  # Pixels
+        dlat = 180.0/nlat
+        dlon = 360.0/nlon
+        self.lats = numpy.ascontiguousarray(numpy.tile(numpy.arange(  90-0.5*dlat, -90, -dlat), (nlon, 1)).transpose())
+        self.lons = numpy.tile(numpy.arange(-180+0.5*dlon, 180,  dlon), (nlat, 1))
     
-    def load_sids_pickle(self, pickle_name='imerg_sids.pickle'):        
+    def load_sids_pickle(self, pickle_name='satcorps_composite_sids.pickle'):        
         with open(pickle_name, 'rb') as picke_file:
             self.sids = pickle.load(picke_file)
             
-    def save_sids_pickle(self, pickle_name='imerg_sids.pickle'):        
+    def save_sids_pickle(self, pickle_name='satcorps_composite_sids.pickle'):        
         with open(pickle_name, 'wb') as picke_file:
             pickle.dump(self.sids, picke_file)
     
@@ -30,7 +34,7 @@ class IMERG:
         self.sids = pystare.from_latlon_2d(self.lats, self.lons, adapt_level=True)
     
     def get_sids(self):
-        pickle_name = 'imerg_sids.pickle'
+        pickle_name = 'satcorps_composite_sids.pickle'
         if os.path.exists(pickle_name):
             self.load_sids_pickle(pickle_name)
         else:
@@ -47,7 +51,7 @@ class IMERG:
         j = self.lats.shape[1]
         l = cover_sids.size
         
-        sidecar = Sidecar(granule_path='IMERG.HDF5', out_path=out_path)
+        sidecar = Sidecar(granule_path='satCORPS_composite.nc', out_path=out_path)
         sidecar.write_dimensions(i, j, l, nom_res=self.nom_res)    
         sidecar.write_sids(sids, nom_res=self.nom_res)
         sidecar.write_cover(cover_sids, nom_res=self.nom_res)
