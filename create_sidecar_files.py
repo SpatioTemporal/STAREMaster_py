@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 import staremaster.products
 import glob
@@ -107,6 +109,8 @@ def get_installed_products():
     products = [name for _, name, _ in pkgutil.iter_modules([starmeaster_path])]
     return products
 
+def main():
+    print('main')
 
 if __name__ == '__main__':
     installed_products = get_installed_products()
