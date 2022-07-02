@@ -42,14 +42,17 @@ class MOD09(HDFeos):
             lon_500_g = scipy.ndimage.zoom(group_lons, (19 / 10, 2707 / 1354), order=1)
 
             # Calculate the gradient to
-            # a) shift 0.5 lenghts (250 m) in track direction and 1 length (500 m) in scan direction
-            # b) Extrapolate the last observation in track direction
+            # a) shift 0.5 lenghts (250 m) in track direction
+            # b) It is not obvious, but possibly also by 1 length (500 m) in scan direction
+            # c) Extrapolate the last observation in track direction
             gxx_lat, gyy_lat = numpy.gradient(lat_500_g)
-            lat_500_g = lat_500_g - 0.5 * gxx_lat - 1 * gyy_lat
+            # lat_500_g = lat_500_g - 0.5 * gxx_lat - 1 * gyy_lat
+            lat_500_g = lat_500_g - 0.5 * gxx_lat
             lat_final = lat_500_g[-1] + 1 * gxx_lat[-1]  # Last row of group
 
             gxx_lon, gyy_lon = numpy.gradient(lon_500_g)
-            lon_500_g = lon_500_g - 0.5 * gxx_lon - 1 * gyy_lon
+            # lon_500_g = lon_500_g - 0.5 * gxx_lon - 1 * gyy_lon
+            lon_500_g = lon_500_g - 0.5 * gxx_lon
             lon_final = lon_500_g[-1] + 1 * gxx_lon[-1]  # Last row of group
 
             lat_500_g = numpy.append(lat_500_g, [lat_final], axis=0)
