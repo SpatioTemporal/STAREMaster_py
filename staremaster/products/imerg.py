@@ -11,12 +11,17 @@ class IMERG:
         ## IMERG is a gridded dataset on a 0.05 degree grid
         self.lats = None
         self.lons = None
-        self.make_latlon()
         self.nom_res = ''
+        self.sids = []
         
-    def make_latlon(self):
+    def get_latlon(self):
         self.lats = numpy.ascontiguousarray(numpy.tile(numpy.arange(-89.95, 90, 0.1), (3600, 1)).transpose())
         self.lons = numpy.tile(numpy.arange(-179.95, 180, 0.1), (1800, 1))
+
+    def get_cover_sids(self):
+        cover_sids = numpy.array([0x0000000000000000, 0x0800000000000000, 0x1000000000000000, 0x1800000000000000,
+                                  0x2000000000000000, 0x2800000000000000, 0x3000000000000000, 0x3800000000000000])
+        return cover_sids
     
     def load_sids_pickle(self, pickle_name='imerg_sids.pickle'):        
         with open(pickle_name, 'rb') as picke_file:
@@ -39,9 +44,7 @@ class IMERG:
 
     def create_sidecar(self, out_path):
         sids = self.get_sids()
-        
-        cover_sids = numpy.array([0x0000000000000000, 0x0800000000000000, 0x1000000000000000, 0x1800000000000000,
-                                  0x2000000000000000, 0x2800000000000000, 0x3000000000000000, 0x3800000000000000])
+        cover_sids = self.get_cover_sids()
         
         i = self.lats.shape[0]
         j = self.lats.shape[1]

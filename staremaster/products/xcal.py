@@ -14,9 +14,11 @@ class XCAL:
         self.netcdf = netCDF4.Dataset(file_path, 'r', format='NETCDF4')
         self.lats = {}
         self.lons = {}
-        self.read_latlon()
 
-    def read_latlon(self):
+    def load(self):
+        self.get_latlon()
+
+    def get_latlon(self):
         for scan in self.scans:
             self.lats[scan] = self.netcdf.groups[scan]['Latitude'][:].data.astype(numpy.double)
             self.lons[scan] = self.netcdf.groups[scan]['Longitude'][:].data.astype(numpy.double)
@@ -38,13 +40,13 @@ class XCAL:
 
             sids_adapted = pystare.spatial_coerce_resolution(sids, cover_res)
 
-            cover = staremaster.conversions.merge_stare(sids_adapted, n_workers=n_workers)
+            cover_sids = staremaster.conversions.merge_stare(sids_adapted, n_workers=n_workers)
 
-            cover_all.append(cover)
+            cover_all.append(cover_sids)
 
             i = lats.shape[0]
             j = lats.shape[1]
-            l = cover.size
+            l = cover_sids.size
 
             nom_res = None
 
@@ -52,7 +54,7 @@ class XCAL:
             sidecar.write_lons(lons, nom_res=nom_res, group=scan)
             sidecar.write_lats(lats, nom_res=nom_res, group=scan)
             sidecar.write_sids(sids, nom_res=nom_res, group=scan)
-            sidecar.write_cover(cover, nom_res=nom_res, group=scan)
+            sidecar.write_cover(cover_sids, nom_res=nom_res, group=scan)
 
         cover_all = numpy.concatenate(cover_all)
         cover_all = staremaster.conversions.merge_stare(cover_all, n_workers=n_workers)

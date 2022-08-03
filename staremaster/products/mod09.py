@@ -1,36 +1,33 @@
-import staremaster.conversions
 from staremaster.products.hdfeos import HDFeos
-from staremaster.sidecar import Sidecar
 import numpy
 import scipy.ndimage
+import copy
 
 
 class MOD09(HDFeos):
-    
+
     def __init__(self, file_path):
         super(MOD09, self).__init__(file_path)
-        self.read_laton()
-        self.read_gring()
         self.nom_res = ['1km', '500m']
-        
+        self.read_gring()
+
+    def load(self):
+        self.read_gring()
+        self.read_latlon()
+
     def read_gring(self):
-        core_metadata = self.get_metadata_group('CoreMetadata')    
-        g_points = core_metadata['INVENTORYMETADATA']['SPATIALDOMAINCONTAINER']['HORIZONTALSPATIALDOMAINCONTAINER']['GPOLYGON']['GPOLYGONCONTAINER']['GRINGPOINT']        
+        core_metadata = self.get_metadata_group('CoreMetadata')
+        g_points = \
+        core_metadata['INVENTORYMETADATA']['SPATIALDOMAINCONTAINER']['HORIZONTALSPATIALDOMAINCONTAINER']['GPOLYGON'][
+            'GPOLYGONCONTAINER']['GRINGPOINT']
         lats = g_points['GRINGPOINTLATITUDE']['VALUE']
         lons = g_points['GRINGPOINTLONGITUDE']['VALUE']
-        self.gring_lats = list(map(float,lats.strip('()').split(', ')))[::-1]
+        self.gring_lats = list(map(float, lats.strip('()').split(', ')))[::-1]
         self.gring_lons = list(map(float, lons.strip('()').split(', ')))[::-1]
 
-    def read_ds(self, sd_name):
-        ds = self.hdf.select(sd_name)
-        data = ds.get()
-        attributes = ds.attributes()
-        fill_value = attributes['_FillValue']
-        sd.get().astype(numpy.double)
-
-    def read_laton(self):
-        self.lons['1km'] = self.read_sd('Longitude')
-        self.lats['1km'] = self.hdf.select('Latitude').get().astype(numpy.double)
+    def read_latlon(self):
+        self.lons['1km'] = self.read_ds('Longitude')
+        self.lats['1km'] = self.read_ds('Latitude')
         self.get_500m_latlon()
 
     def get_500m_latlon(self):
@@ -40,9 +37,13 @@ class MOD09(HDFeos):
         # Turns out they are not always 2030, but somtimes 2040 scans
         n_scans = self.lats['1km'].shape[0]
 
+        lats_1km = copy.copy(self.lats['1km'])
+        lats_1km[lats_1km.mask] = numpy.nan
+        lons_1km = copy.copy(self.lons['1km'])
+        lons_1km[lons_1km.mask] = numpy.nan
         for group_start in range(0, n_scans, 10):
-            group_lats = self.lats['1km'][group_start:group_start + 10]
-            group_lons = self.lons['1km'][group_start:group_start + 10]
+            group_lats = lats_1km[group_start:group_start + 10]
+            group_lons = lons_1km[group_start:group_start + 10]
 
             # Zoom out by factor (2n-1)/2; I.e. 2707/1354 in scan, 19/10 in track
             lat_500_g = scipy.ndimage.zoom(group_lats, (19 / 10, 2707 / 1354), order=1)
@@ -80,7 +81,10 @@ class MOD09(HDFeos):
             lat_500.append(lat_500_g)
             lon_500.append(lon_500_g)
 
-        self.lats['500m'] = numpy.concatenate(lat_500)
-        self.lons['500m'] = numpy.concatenate(lon_500)
+        lat_500 = numpy.concatenate(lat_500)
+        lat_500 = numpy.ma.array(lat_500, mask=numpy.isnan(lat_500))
+        self.lats['500m'] = lat_500
 
-
+        lon_500 = numpy.concatenate(lon_500)
+        lon_500 = numpy.ma.array(lon_500, mask=numpy.isnan(lon_500))
+        self.lons['500m'] = lon_500

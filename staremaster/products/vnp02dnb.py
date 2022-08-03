@@ -10,13 +10,7 @@ class VNP02DNB(L2_VIIRS):
         companion_path = self.guess_companion_path()
         self.netcdf = netCDF4.Dataset(companion_path, 'r', format='NETCDF4')
         self.nom_res = '750m'
-        try:
-            self.read_latlon()            
-            self.read_gring()
-        except Exception as e:
-            print(file_path)   
-            raise(e)
-    
+
     def guess_companion_path(self):
         name_trunk = self.file_path.split('.')[0:-2]
         pattern = '.'.join(name_trunk).replace('VNP02DNB', 'VNP03DNB') + '*[!_stare].nc'

@@ -10,11 +10,6 @@ class CLMDKS_L2_VIIRS(L2_VIIRS):
     def __init__(self, file_path):
         super(CLMDKS_L2_VIIRS, self).__init__(file_path)
         self.nom_res = '750m'
-        try:
-            self.read_latlon()
-            self.read_gring()
-        except:
-            print(file_path)   
 
         
        

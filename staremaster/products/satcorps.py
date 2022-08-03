@@ -11,10 +11,12 @@ class satCORPS:
         ## satCORPS is a gridded dataset on a 0.05 degree grid
         self.lats = None
         self.lons = None
-        self.make_latlon()
         self.nom_res = ''
-        
-    def make_latlon(self):
+
+    def load(self):
+        self.get_latlon()
+
+    def get_latlon(self):
         nlat = 6660   # Lines
         nlon = 13320  # Pixels
         dlat = 180.0/nlat
@@ -43,10 +45,10 @@ class satCORPS:
 
     def create_sidecar(self, out_path):
         sids = self.get_sids()
-        
+
         cover_sids = numpy.array([0x0000000000000000, 0x0800000000000000, 0x1000000000000000, 0x1800000000000000,
                                   0x2000000000000000, 0x2800000000000000, 0x3000000000000000, 0x3800000000000000])
-        
+
         i = self.lats.shape[0]
         j = self.lats.shape[1]
         l = cover_sids.size

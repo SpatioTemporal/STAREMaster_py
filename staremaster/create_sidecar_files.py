@@ -45,7 +45,7 @@ def create_sidecar(file_path, n_workers, product, cover_res, out_path, archive):
         print('product not supported')
         print('supported products are {}'.format(get_installed_products()))
         quit()
-
+    granule.load()
     sidecar = granule.create_sidecar(n_workers, cover_res, out_path)
 
     if archive:

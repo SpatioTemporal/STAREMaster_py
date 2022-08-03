@@ -1,4 +1,5 @@
-from staremaster.products.vnp02dnb import VNP02DNB 
+from staremaster.products.vnp02dnb import VNP02DNB
+import glob
 
 
 class VJ102DNB(VNP02DNB):

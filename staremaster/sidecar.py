@@ -41,7 +41,6 @@ class Sidecar:
             grp.createDimension(i_name, i)
             grp.createDimension(j_name, j)
 
-
     def write_lons(self, lons, nom_res=None, group=None):
         i = lons.shape[0]
         j = lons.shape[1]
@@ -77,7 +76,7 @@ class Sidecar:
             varname += '_{nom_res}'.format(nom_res=nom_res)
             i_name += '_{nom_res}'.format(nom_res=nom_res)
             j_name += '_{nom_res}'.format(nom_res=nom_res)
-        with netCDF4.Dataset(self.file_path , 'a', format="NETCDF4") as rootgrp:
+        with netCDF4.Dataset(self.file_path, 'a', format="NETCDF4") as rootgrp:
             if group:
                 grp = rootgrp.createGroup(group)
             else:
@@ -112,7 +111,8 @@ class Sidecar:
                                              dimensions=(i_name, j_name),
                                              chunksizes=[i, j],
                                              shuffle=self.shuffle,
-                                             zlib=self.zlib)
+                                             zlib=self.zlib,
+                                             fill_value=-1)
             sids_netcdf.long_name = 'SpatioTemporal Adaptive Resolution Encoding (STARE) index'
             sids_netcdf[:, :] = sids
 

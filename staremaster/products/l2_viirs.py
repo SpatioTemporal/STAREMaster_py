@@ -12,8 +12,12 @@ class L2_VIIRS:
         self.lats = None
         self.lons = None
         self.gring_lats = None
-        self.gring_lon = None      
-        
+        self.gring_lons = None
+
+    def load(self):
+        self.read_gring()
+        self.read_latlon()
+
     def read_latlon(self):
         self.lats = self.netcdf.groups['geolocation_data']['latitude'][:].data.astype(numpy.double)
         self.lons = self.netcdf.groups['geolocation_data']['longitude'][:].data.astype(numpy.double)
@@ -21,6 +25,10 @@ class L2_VIIRS:
     def read_gring(self):        
         self.gring_lats = self.netcdf.GRingPointLatitude[::-1]
         self.gring_lons = self.netcdf.GRingPointLongitude[::-1]
+
+    def get_cover_sids(self, cover_res):
+        cover_sids = staremaster.conversions.gring2cover(self.gring_lats, self.gring_lons, cover_res)
+        return cover_sids
 
     def create_sidecar(self, n_workers=1, cover_res=None, out_path=None):
         sids = staremaster.conversions.latlon2stare(lats=self.lats,
@@ -31,9 +39,8 @@ class L2_VIIRS:
         
         if not cover_res:
             cover_res = staremaster.conversions.min_resolution(sids)
-            
-        cover_sids = staremaster.conversions.gring2cover(self.gring_lats, self.gring_lons, cover_res)
-        
+        cover_sids = self.get_cover_sids(cover_res)
+
         i = self.lats.shape[0]
         j = self.lats.shape[1]
         l = cover_sids.size
