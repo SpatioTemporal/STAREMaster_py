@@ -2,6 +2,7 @@ import xarray
 import pystare
 import numpy
 import distributed
+import multiprocessing
 
 
 # This is a workaround for https://github.com/dask/distributed/issues/4168
