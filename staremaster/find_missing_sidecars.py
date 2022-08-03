@@ -1,14 +1,9 @@
 #!/usr/bin/python3
 
-import requests
-import time
 import glob
 import os
-import xml
-import xml.etree.ElementTree as ET
 import argparse
 import netCDF4
-import sys
 import re
 import pandas
 
