@@ -1,5 +1,5 @@
-This is a python implementation of STAREMaster.
-
+STAREMaster_py is the python implementation of STAREMaster. 
+It is used to create sidecar files for a collection of remote sensing products
 
 # Install
 

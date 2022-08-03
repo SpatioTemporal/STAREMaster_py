@@ -25,3 +25,6 @@ class MainTest(unittest.TestCase):
             self.assertTrue(sids[10,10] == 3461778018277136489)
         os.remove(sidecar_path)
          
+
+def test_bad_mod09():
+    pass

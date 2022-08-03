@@ -21,8 +21,15 @@ class MOD09(HDFeos):
         self.gring_lats = list(map(float,lats.strip('()').split(', ')))[::-1]
         self.gring_lons = list(map(float, lons.strip('()').split(', ')))[::-1]
 
+    def read_ds(self, sd_name):
+        ds = self.hdf.select(sd_name)
+        data = ds.get()
+        attributes = ds.attributes()
+        fill_value = attributes['_FillValue']
+        sd.get().astype(numpy.double)
+
     def read_laton(self):
-        self.lons['1km'] = self.hdf.select('Longitude').get().astype(numpy.double)
+        self.lons['1km'] = self.read_sd('Longitude')
         self.lats['1km'] = self.hdf.select('Latitude').get().astype(numpy.double)
         self.get_500m_latlon()
 
