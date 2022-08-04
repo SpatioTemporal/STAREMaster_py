@@ -20,6 +20,6 @@ class MOD05(HDFeos):
         self.gring_lats = list(map(float, lats.strip('()').split(', ')))[::-1]
         self.gring_lons = list(map(float, lons.strip('()').split(', ')))[::-1]
 
-    def read_laton(self):
+    def read_latlon(self):
         self.lons['5km'] = self.read_ds('Latitude')
         self.lats['5km'] = self.read_ds('Latitude')
