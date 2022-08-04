@@ -10,10 +10,10 @@ Create a virtualenv:
 
     mkvirtualevironment staremaster_py
 
-The dependency pystare is not yet on pypi and therefore has to be installed e.g. from github:
+Install from pypi
 
-    pip3 install git+https://github.com/NiklasPhabian/pystare.git
-    
+   pip install staremaster
+   
 we then can install STAREMaster_py with 
 
     pip3 install -e STAREMaster_py/
@@ -51,11 +51,9 @@ xarray and dask are hardcoded dependecies, but will become optional in the futur
 # Usage
 
 ```
-
-usage: create_sidecar_files.py [-h] [--folder folder] 
-[--files files [files ...]] [--out_path out_path] 
-[--product product] [--cover_res cover_res] [--workers n_workers] 
-[--catalogue catalogue] [--parallel_files]
+usage: create_sidecar_files.py [-h] [--folder folder] [--files files [files ...]] [--grid files] [--out_path OUT_PATH]
+                               [--product product] [--cover_res cover_res] [--workers n_workers] [--archive archive]
+                               [--parallel_files]
 
 Creates Sidecar Files
 
@@ -64,19 +62,16 @@ optional arguments:
   --folder folder       the folder to create sidecars for
   --files files [files ...]
                         the files to create a sidecar for
-  --out_path out_path   the folder to create sidecars in; 
-                        default: next to granule
-  --product product     product (e.g. VNP03DNB, MOD09, MOD05)
+  --grid files          the grid to create a sidecar for (e.g. IMERG)
+  --out_path OUT_PATH   the folder to create sidecars in; default: next to granule
+  --product product     product (e.g. cldmsk_l2_viirs, hdfeos, l2_viirs, mod05, mod09, vj102dnb, vj103dnb, vnp02dnb, vnp03dnb,
+                        ssmi)
   --cover_res cover_res
-                        max STARE resolution of the cover.
-                        Default: min resolution of iFOVs
+                        max STARE resolution of the cover. Default: min resolution of iFOVs
   --workers n_workers   use n_workers (local) dask workers
-  --catalogue catalogue
-                        Create sidecars only for granules not 
-                        listed in the archive file. 
-                        Record all create sidecars and their
+  --archive archive     Create sidecars only for granules not listed in the archive file. Record all create sidecars and their
                         corresponding granules in it.
-
+  --parallel_files      Process files in parallel rather than looking up SIDs in parallel
 
 ```
 
