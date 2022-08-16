@@ -18,6 +18,7 @@ def create_grid_sidecar(grid, out_path):
 
 
 def create_sidecar(file_path, n_workers, product, cover_res, out_path, archive):
+    print(f'creating sidecar for {file_path}')
     if product is None:
         product = guess_product(file_path)
 
@@ -46,7 +47,7 @@ def create_sidecar(file_path, n_workers, product, cover_res, out_path, archive):
         print('supported products are {}'.format(get_installed_products()))
         quit()
     granule.load()
-    sidecar = granule.create_sidecar(n_workers, cover_res, out_path)
+    sidecar = granule.create_sidecar(n_workers=n_workers, cover_res=cover_res, out_path=out_path)
 
     if archive:
         with filelock.FileLock(archive + '.lock.'):
@@ -159,8 +160,8 @@ def main():
         map_args = zip(file_paths,
                        itertools.repeat(1),
                        itertools.repeat(args.product),
-                       itertools.repeat(args.out_path),
                        itertools.repeat(args.cover_res),
+                       itertools.repeat(args.out_path),
                        itertools.repeat(args.archive))
         with multiprocessing.Pool(processes=args.workers) as pool:
             pool.starmap(create_sidecar, map_args)
@@ -172,7 +173,7 @@ def main():
                            out_path=args.out_path,
                            cover_res=args.cover_res,
                            archive=args.archive)
-
+            
 
 if __name__ == '__main__':
     main()
