@@ -9,7 +9,7 @@ def test_make_sidecar():
     # Let's just verify this does not crash        
     file_path = 'tests/data/mod05/MOD05_L2.A2005349.2125.061.2017294065400.hdf'
     granule = staremaster.products.mod05.MOD05(file_path)
-    granule.read_laton()
+    granule.read_latlon()
     granule.read_gring()
     granule.create_sidecar(n_workers=1, cover_res=None, out_path=None)
 
