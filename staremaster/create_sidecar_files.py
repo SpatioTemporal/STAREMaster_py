@@ -92,12 +92,13 @@ def remove_archived(file_paths, archive):
     if glob.glob(archive):
         with open(archive, 'r') as cat:
             csv = cat.readlines()
-        loaded_files = []
+        archived = []
         for row in csv:
-            loaded_files.append(row.split(',')[0])
-        print(loaded_files)
-        print('Have been recorded in the archive and will not be processed')
-        unprocessed = list(set(file_paths) - set(loaded_files))
+            archived.append(row.split(',')[0])
+        n_archived = len(archived)
+        n_filepaths = len(file_paths)
+        print(f'{n_archived} out of {n_filepaths} been recorded in the archive and will not be processed')
+        unprocessed = list(set(file_paths) - set(archived))
     else:
         unprocessed = file_paths
     return unprocessed

@@ -82,8 +82,13 @@ class HDFeos:
         return data
 
     def create_sidecar(self, n_workers, cover_res=None, out_path=None):
-        self.make_sids(n_workers)
-        self.make_cover_sids(cover_res)
+        try:
+            self.make_sids(n_workers)
+            self.make_cover_sids(cover_res)
+        except ValueError as e:
+            print('Failed to create sids/covers for {file_name}'.format(file_name=self.file_path)
+            raise ValueError
+
 
         sidecar = Sidecar(self.file_path, out_path)
         sidecar.write_cover(self.cover_sids, nom_res=self.nom_res)
