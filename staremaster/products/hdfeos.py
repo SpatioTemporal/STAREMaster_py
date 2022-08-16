@@ -60,13 +60,17 @@ class HDFeos:
                                                         resolution=None, n_workers=n_workers, adapt_resolution=True)
             sids = numpy.ma.array(sids, mask=self.lats[res].mask, fill_value=-1)
             self.sids[res] = sids
+            
+    def get_cover_res_from_sids(self):
+        sids = self.sids[self.nom_res[0]]
+        sids = sids[sids.mask == False]
+        cover_res = staremaster.conversions.min_resolution(sids)
+        return cover_res
 
     def make_cover_sids(self, cover_res):
         if cover_res is None:
             # If we didn't get a cover resolution, we take the minimum of the iFOV resolutions
-            sids = self.sids[self.nom_res[0]]
-            sids = sids[sids.mask == False]
-            cover_res = staremaster.conversions.min_resolution(sids)
+            cover_res = self.get_cover_res_from_sids()
         self.read_gring()
         self.cover_sids = staremaster.conversions.gring2cover(self.gring_lats, self.gring_lons, cover_res)
 
@@ -82,13 +86,13 @@ class HDFeos:
         return data
 
     def create_sidecar(self, n_workers, cover_res=None, out_path=None):
+        self.make_sids(n_workers)
         try:
-            self.make_sids(n_workers)
             self.make_cover_sids(cover_res)
         except ValueError as e:
             print('Failed to create sids/covers for {file_name}'.format(file_name=self.file_path))
-            raise ValueError
-
+            raise e
+            
         sidecar = Sidecar(self.file_path, out_path)
         sidecar.write_cover(self.cover_sids, nom_res=self.nom_res)
 
