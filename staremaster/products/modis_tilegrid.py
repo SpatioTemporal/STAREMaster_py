@@ -1,20 +1,6 @@
-import pyproj
 import numpy
 import staremaster.sidecar
 
-sinu_wkt = '''  PROJCRS["MODIS Sinusoidal",
-                    BASEGEOGCRS["",
-                        DATUM["unnamed", ELLIPSOID["WGS 84",6371007.181,0,LENGTHUNIT["metre",1]]],
-                        PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]]],
-                CONVERSION["",
-                    METHOD["Sinusoidal"],
-                    PARAMETER["semi_major",6371007.181],
-                    PARAMETER["semi_minor",6371007.181]],
-                CS[Cartesian,2],
-                    AXIS["(E)",east,ORDER[1],LENGTHUNIT["m",1]],
-                    AXIS["(N)",north,ORDER[2],LENGTHUNIT["m",1]]]'''
-
-sinu_crs = pyproj.crs.CRS(sinu_wkt)
 r = 6371007.181
 
 
