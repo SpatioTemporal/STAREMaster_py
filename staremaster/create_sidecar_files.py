@@ -11,9 +11,12 @@ import importlib
 import re
 
 
-def create_grid_sidecar(grid, out_path):
-    if grid == 'IMERG':
+def create_grid_sidecar(grid, out_path, n_workers):
+    grid = grid.lower()
+    if grid == 'imerg':
         granule = staremaster.products.IMERG()
+    elif grid[0] == 'h' and grid[3] == 'v':
+        granule = staremaster.products.ModisTile(grid)
     granule.create_sidecar(out_path)
 
 
@@ -119,7 +122,7 @@ def main():
     parser.add_argument('--files', metavar='files', nargs='+', type=str,
                         help='the files to create a sidecar for')
     parser.add_argument('--grid', metavar='files', type=str,
-                        help='the grid to create a sidecar for (e.g. IMERG)')
+                        help='the grid to create a sidecar for (e.g. IMERG, h08v05)')
     parser.add_argument('--out_path', type=str,
                         help='the folder to create sidecars in; default: next to granule')
     parser.add_argument('--product', metavar='product', type=str,
@@ -146,7 +149,7 @@ def main():
     elif args.folder:
         file_paths = list_granules(args.folder, product=args.product)
     elif args.grid:
-        create_grid_sidecar(args.grid, args.out_path)
+        create_grid_sidecar(args.grid, args.out_path, n_workers=args.workers)
         quit()
     else:
         print('Wrong usage; need to specify a folder, file, or grid\n')
@@ -173,8 +176,7 @@ def main():
                            out_path=args.out_path,
                            cover_res=args.cover_res,
                            archive=args.archive)
-            
+
 
 if __name__ == '__main__':
     main()
-

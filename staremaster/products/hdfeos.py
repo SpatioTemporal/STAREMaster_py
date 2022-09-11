@@ -92,7 +92,7 @@ class HDFeos:
         except ValueError as e:
             print('Failed to create sids/covers for {file_name}'.format(file_name=self.file_path))
             raise e
-            
+
         sidecar = Sidecar(self.file_path, out_path)
         sidecar.write_cover(self.cover_sids, nom_res=self.nom_res)
 

@@ -10,3 +10,4 @@ from staremaster.products.atms import ATMS
 from staremaster.products.amsr import AMSR
 from staremaster.products.imerg import IMERG
 from staremaster.products.satcorps import satCORPS
+from staremaster.products.modis_tilegrid import ModisTile
