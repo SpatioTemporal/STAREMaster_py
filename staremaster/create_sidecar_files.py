@@ -17,7 +17,10 @@ def create_grid_sidecar(grid, out_path, n_workers):
         granule = staremaster.products.IMERG()
     elif grid[0] == 'h' and grid[3] == 'v':
         granule = staremaster.products.ModisTile(grid)
-    granule.create_sidecar(out_path)
+    else:
+        print('unknown grid')
+        exit()
+    granule.create_sidecar(out_path, n_workers=n_workers)
 
 
 def create_sidecar(file_path, n_workers, product, cover_res, out_path, archive):

@@ -16,16 +16,30 @@ def xy2lonlat(x, y):
     return lon, lat
 
 
-class ModisTile:
+class ModisTile():
     size = 2400  # A tile has 2400x2400 pixels
     res = 463.3127165693852  # (left-right)/2400
     nom_res = '500m'
 
     def __init__(self, tile_name):
         self.tile_name = tile_name
+
+        self.h = None
+        self.v = None
         self.parse_tile_name()
+
+        self.tile_top = None
+        self.tile_bottom = None
+        self.tile_left = None
+        self.tile_right = None
         self.make_bounds()
+
+        self.x_cells_sinu = None
+        self.y_cells_sinu = None
         self.make_xy()
+
+        self.cells_lats = None
+        self.cells_lons = None
         self.make_latlon()
 
     def parse_tile_name(self):
@@ -39,42 +53,41 @@ class ModisTile:
         north = 90 - self.v * 10
         south = north-10
 
-        #self.left, self.top = lonlat2xy(west, north)
-        #self.right, self.bottom = lonlat2xy(east, south)
-        _, self.top = lonlat2xy(0, north)
-        _, self.bottom = lonlat2xy(0, south)
-        self.left, _ = lonlat2xy(west, 0)
-        self.right, _ = lonlat2xy(east, 0)
+        _, self.tile_top = lonlat2xy(0, north)
+        _, self.tile_bottom = lonlat2xy(0, south)
+        self.tile_left, _ = lonlat2xy(west, 0)
+        self.tile_right, _ = lonlat2xy(east, 0)
 
     def make_xy(self):
-        self.xs = numpy.tile(numpy.arange(self.left, self.right, self.res), (self.size, 1)) + self.res / 2
-        self.ys = numpy.tile(numpy.arange(self.top, self.bottom, -self.res), (self.size, 1)).T + self.res / 2
+        self.x_cells_sinu = numpy.tile(numpy.arange(self.tile_left, self.tile_right, self.res), (self.size, 1)) + self.res / 2
+        self.y_cells_sinu = numpy.tile(numpy.arange(self.tile_top, self.tile_bottom, -self.res), (self.size, 1)).T - self.res / 2
 
     def make_latlon(self):
-        lons, lats = xy2lonlat(self.xs, self.ys)
-        self.lats = numpy.ascontiguousarray(lats)
-        self.lons = numpy.ascontiguousarray(lons)
+        lons, lats = xy2lonlat(self.x_cells_sinu, self.y_cells_sinu)
+        self.cells_lats = numpy.ascontiguousarray(lats)
+        self.cells_lons = numpy.ascontiguousarray(lons)
 
     def make_cover_sids(self, n_workers=1):
-        self.cover_sids = staremaster.conversions.merge_stare(self.sids, dissolve_sids=False, n_workers=n_workers, n_chunks=1)
+        self.cover_sids = staremaster.conversions.merge_stare(self.sids, dissolve_sids=False,
+                                                              n_workers=n_workers, n_chunks=1)
 
     def make_sids(self, n_workers):
-        self.sids = staremaster.conversions.latlon2stare(self.lats, self.lons, resolution=None,
+        self.sids = staremaster.conversions.latlon2stare(self.cells_lats, self.cells_lons, resolution=None,
                                                          n_workers=n_workers, adapt_resolution=True)
 
     def create_sidecar(self, out_path, n_workers=1):
         self.make_sids(n_workers=n_workers)
         self.make_cover_sids(n_workers=n_workers)
 
-        i = self.lats.shape[0]
-        j = self.lats.shape[1]
+        i = self.cells_lats.shape[0]
+        j = self.cells_lats.shape[1]
         l = self.cover_sids.size
 
         sidecar = staremaster.sidecar.Sidecar(granule_path='{}.hdf'.format(self.tile_name), out_path=out_path)
         sidecar.write_dimensions(i, j, l, nom_res=self.nom_res)
         sidecar.write_sids(self.sids, nom_res=self.nom_res)
-        sidecar.write_lons(self.lons, nom_res=self.nom_res)
-        sidecar.write_lats(self.lats, nom_res=self.nom_res)
+        sidecar.write_lons(self.cells_lons, nom_res=self.nom_res)
+        sidecar.write_lats(self.cells_lats, nom_res=self.nom_res)
         sidecar.write_cover(self.cover_sids, nom_res=self.nom_res)
 
 
