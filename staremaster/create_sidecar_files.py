@@ -36,8 +36,8 @@ def create_sidecar(file_path, n_workers, product, cover_res, out_path, archive):
         granule = staremaster.products.MOD09(file_path)
     elif product == 'VNP02DNB':
         granule = staremaster.products.VNP02DNB(file_path)
-    elif product == 'VNP03DNB':
-        granule = staremaster.products.VNP03DNB(file_path)
+    elif product == 'VNP03':
+        granule = staremaster.products.VNP03(file_path)
     elif product == 'VJ102DNB':
         granule = staremaster.products.VJ102DNB(file_path)
     elif product == 'VJ103DNB':
@@ -78,8 +78,8 @@ def guess_product(file_path):
         product = 'MOD05'
     elif 'MOD09' in file_path and '.hdf' in file_name:
         product = 'MOD09'
-    elif ('VNP03DNB' in file_path or 'VJ103DNB' in file_path) and '.nc' in file_name:
-        product = 'VNP03DNB'
+    elif ('VNP03' in file_path or 'VJ103' in file_path) and '.nc' in file_name:
+        product = 'VNP03'
     elif ('VNP02DNB' in file_path or 'VJ102DNB' in file_path) and '.nc' in file_name:
         product = 'VNP02DNB'
     elif 'CLDMSK_L2_VIIRS' in file_path and '.nc' in file_name:
@@ -130,7 +130,7 @@ def main():
                         help='the folder to create sidecars in; default: next to granule')
     parser.add_argument('--product', metavar='product', type=str,
                         help='product (e.g. cldmsk_l2_viirs, hdfeos, l2_viirs, mod05, mod09, vj102dnb, '
-                             'vj103dnb, vnp02dnb, vnp03dnb, ssmi)',
+                             'vj103dnb, vnp02dnb, vnp03, ssmi)',
                         choices=installed_products, default=None)
     parser.add_argument('--cover_res', metavar='cover_res', type=int,
                         help='max STARE resolution of the cover. Default: min resolution of iFOVs')
