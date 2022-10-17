@@ -6,6 +6,54 @@ import pystare
 
 from pyproj import Proj
 
+# From: https://www.star.nesdis.noaa.gov/atmospheric-composition-training/python_abi_lat_lon.php
+"""
+This Python function can be used to calculate latitude and longitude from the GOES Imager Projection information in any ABI L1b or L2 data file.
+Please acknowledge the NOAA/NESDIS/STAR Aerosols and Atmospheric Composition Science Team if using any of this code in your work/research
+"""
+
+# Calculate latitude and longitude from GOES ABI fixed grid projection data
+# GOES ABI fixed grid projection is a map projection relative to the GOES satellite
+# Units: latitude in °N (°S < 0), longitude in °E (°W < 0)
+# See GOES-R Product User Guide (PUG) Volume 5 (L2 products) Section 4.2.8 for details & example of calculations
+# "file_id" is an ABI L1b or L2 .nc file opened using the netCDF4 library
+
+def calculate_degrees(file_id):
+    
+    # Ignore numpy errors for sqrt of negative number; occurs for GOES-16 ABI CONUS sector data
+    # numpy.seterr(all='ignore')
+    old_settings = numpy.seterr(all='ignore') #seterr to known value
+    
+    # Read in GOES ABI fixed grid projection variables and constants
+    x_coordinate_1d = file_id.variables['x'][:].data.astype(numpy.double)  # E/W scanning angle in radians
+    y_coordinate_1d = file_id.variables['y'][:].data.astype(numpy.double)  # N/S elevation angle in radians
+    projection_info = file_id.variables['goes_imager_projection']
+    lon_origin = projection_info.longitude_of_projection_origin
+    H = projection_info.perspective_point_height+projection_info.semi_major_axis
+    r_eq = projection_info.semi_major_axis
+    r_pol = projection_info.semi_minor_axis
+    
+    # Create 2D coordinate matrices from 1D coordinate vectors
+    x_coordinate_2d, y_coordinate_2d = numpy.meshgrid(x_coordinate_1d, y_coordinate_1d)
+    
+    # Equations to calculate latitude and longitude
+    lambda_0 = (lon_origin*numpy.pi)/180.0  
+    a_var = numpy.power(numpy.sin(x_coordinate_2d),2.0) + (numpy.power(numpy.cos(x_coordinate_2d),2.0)*(numpy.power(numpy.cos(y_coordinate_2d),2.0)+(((r_eq*r_eq)/(r_pol*r_pol))*numpy.power(numpy.sin(y_coordinate_2d),2.0))))
+    b_var = -2.0*H*numpy.cos(x_coordinate_2d)*numpy.cos(y_coordinate_2d)
+    c_var = (H**2.0)-(r_eq**2.0)
+    r_s = (-1.0*b_var - numpy.sqrt((b_var**2)-(4.0*a_var*c_var)))/(2.0*a_var)
+    s_x = r_s*numpy.cos(x_coordinate_2d)*numpy.cos(y_coordinate_2d)
+    s_y = - r_s*numpy.sin(x_coordinate_2d)
+    s_z = r_s*numpy.cos(x_coordinate_2d)*numpy.sin(y_coordinate_2d)
+    
+    abi_lat = (180.0/numpy.pi)*(numpy.arctan(((r_eq*r_eq)/(r_pol*r_pol))*((s_z/numpy.sqrt(((H-s_x)*(H-s_x))+(s_y*s_y))))))
+    abi_lon = (lambda_0 - numpy.arctan(s_y/(H-s_x)))*(180.0/numpy.pi)
+    
+    numpy.seterr(**old_settings)  # reset to default
+    
+    return abi_lat, abi_lon
+
+
 class GOES:
 
     def __init__(self, file_path):
@@ -19,27 +67,14 @@ class GOES:
     def load(self):
         self.get_latlon()
 
+
     def get_latlon(self):
 
         #old for scan in self.scans:
         #old     self.lats[scan] = self.netcdf.groups[scan]['Latitude'][:].data.astype(numpy.double)
         #old     self.lons[scan] = self.netcdf.groups[scan]['Longitude'][:].data.astype(numpy.double)
 
-        # Satellite height
-        sat_h = self.netcdf.variables['goes_imager_projection'].perspective_point_height
-        # Satellite longitude
-        sat_lon = self.netcdf.variables['goes_imager_projection'].longitude_of_projection_origin
-        # Satellite sweep
-        sat_sweep = self.netcdf.variables['goes_imager_projection'].sweep_angle_axis
-        # The projection x and y coordinates equals
-        # the scanning angle (in radians) multiplied by the satellite height (http://proj4.org/projections/geos.html)
-        X = self.netcdf.variables['x'][:][:] * sat_h
-        Y = self.netcdf.variables['y'][:][:] * sat_h
-        # map object with pyproj
-        p = Proj(proj='geos', h=sat_h, lon_0=sat_lon, sweep=sat_sweep, a=6378137.0)
-        # Convert map points to latitude and longitude with the magic provided by Pyproj
-        XX, YY = numpy.meshgrid(X, Y)
-        lons, lats = p(XX, YY, inverse=True)
+        lats,lons = calculate_degrees(self.netcdf)
 
         # Pixels outside the globe as self.fill_value (default -9999)
         mask = (lons == lons[0][0])
@@ -78,9 +113,15 @@ class GOES:
         for resolution_name in self.lons.keys():
             lons = self.lons[resolution_name]
             lats = self.lats[resolution_name]
-            sids = staremaster.conversions.latlon2stare(lats, lons, n_workers=n_workers)
 
+            # The following does not handle masked data or with weird fill values.
+            # sids = staremaster.conversions.latlon2stare(lats, lons, n_workers=n_workers)
+            
+            sids = numpy.full(lats.shape,self.fill_value,dtype=numpy.int64)
+            
             not_mask = ~self.mask[resolution_name]
+            
+            sids[not_mask] = pystare.from_latlon(lats[not_mask],lons[not_mask],level=27)
 
             if not cover_res:
                 # Need to drop the resolution to make the cover less sparse
@@ -89,14 +130,11 @@ class GOES:
                 if cover_res < 0:
                     cover_res = 0
 
-            print(1000)
             # sids_adapted = pystare.spatial_coerce_resolution(sids[not_mask], cover_res)
             sids_adapted = pystare.spatial_coerce_resolution(sids, cover_res)
 
-            print(2000)
             cover_sids = staremaster.conversions.merge_stare(sids_adapted, n_workers=n_workers)
 
-            print(3000)
             cover_all.append(cover_sids)
 
             i = lats.shape[0]
@@ -107,17 +145,15 @@ class GOES:
 
             nom_res = None
 
-            print(4000)
             sidecar.write_dimensions(i, j, l, nom_res=nom_res, group=resolution_name)
             sidecar.write_lons(lons, nom_res=nom_res, group=resolution_name)
             sidecar.write_lats(lats, nom_res=nom_res, group=resolution_name)
             sidecar.write_sids(sids, nom_res=nom_res, group=resolution_name)
             sidecar.write_cover(cover_sids, nom_res=nom_res, group=resolution_name)
 
-        print(5000)
         cover_all = numpy.concatenate(cover_all)
         cover_all = staremaster.conversions.merge_stare(cover_all, n_workers=n_workers)
-        sidecar.write_dimension('l', cover_all.size)
+        # sidecar.write_dimension('l', cover_all.size) # Already in the next call... since no group.
         sidecar.write_cover(cover_all, nom_res=nom_res)
 
         return sidecar
