@@ -41,7 +41,7 @@ class Sidecar:
             grp.createDimension(i_name, i)
             grp.createDimension(j_name, j)
 
-    def write_lons(self, lons, nom_res=None, group=None):
+    def write_lons(self, lons, nom_res=None, group=None, fill_value=None):
         i = lons.shape[0]
         j = lons.shape[1]
         varname = 'Longitude'
@@ -61,12 +61,13 @@ class Sidecar:
                                              dimensions=(i_name, j_name),
                                              chunksizes=[i, j],
                                              shuffle=self.shuffle,
-                                             zlib=self.zlib)
+                                             zlib=self.zlib,
+                                             fill_value=fill_value)
             lons_netcdf.long_name = 'Longitude'
             lons_netcdf.units = 'degrees_east'
             lons_netcdf[:, :] = lons
     
-    def write_lats(self, lats, nom_res=None, group=None):
+    def write_lats(self, lats, nom_res=None, group=None, fill_value=None):
         i = lats.shape[0]
         j = lats.shape[1]
         varname = 'Latitude'
@@ -86,12 +87,13 @@ class Sidecar:
                                              dimensions=(i_name, j_name),
                                              chunksizes=[i, j],
                                              shuffle=self.shuffle,
-                                             zlib=self.zlib)
+                                             zlib=self.zlib,
+                                             fill_value=fill_value)
             lats_netcdf.long_name = 'Latitude'
             lats_netcdf.units = 'degrees_north'
-            lats_netcdf[:, :] = lats
+            lats_netcdf[:, :] = lats            
         
-    def write_sids(self, sids, nom_res=None, group=None):
+    def write_sids(self, sids, nom_res=None, group=None, fill_value=-1):
         i = sids.shape[0]
         j = sids.shape[1]
         varname = 'STARE_index'.format(nom_res=nom_res)
@@ -112,11 +114,11 @@ class Sidecar:
                                              chunksizes=[i, j],
                                              shuffle=self.shuffle,
                                              zlib=self.zlib,
-                                             fill_value=-1)
+                                             fill_value=fill_value)
             sids_netcdf.long_name = 'SpatioTemporal Adaptive Resolution Encoding (STARE) index'
             sids_netcdf[:, :] = sids
 
-    def write_cover(self, cover, nom_res=None, group=None):
+    def write_cover(self, cover, nom_res=None, group=None, fill_value=None):
         l = cover.size
         varname = 'STARE_cover'
         l_name = 'l'
@@ -132,7 +134,8 @@ class Sidecar:
                                               dimensions=(l_name),
                                               chunksizes=[l],
                                               shuffle=self.shuffle,
-                                              zlib=self.zlib)
+                                              zlib=self.zlib,
+                                              fill_value=fill_value)
             cover_netcdf.long_name = 'SpatioTemporal Adaptive Resolution Encoding (STARE) cover'
             cover_netcdf[:] = cover
  

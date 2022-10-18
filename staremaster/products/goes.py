@@ -163,10 +163,10 @@ class GOES:
             nom_res = None
 
             sidecar.write_dimensions(i, j, l, nom_res=nom_res, group=resolution_name)
-            sidecar.write_lons(lons, nom_res=nom_res, group=resolution_name)
-            sidecar.write_lats(lats, nom_res=nom_res, group=resolution_name)
-            sidecar.write_sids(sids, nom_res=nom_res, group=resolution_name)
-            sidecar.write_cover(cover_sids, nom_res=nom_res, group=resolution_name)
+            sidecar.write_lons(lons, nom_res=nom_res, group=resolution_name, fill_value=self.fill_value_in)
+            sidecar.write_lats(lats, nom_res=nom_res, group=resolution_name, fill_value=self.fill_value_in)
+            sidecar.write_sids(sids, nom_res=nom_res, group=resolution_name, fill_value=self.fill_value_out)
+            sidecar.write_cover(cover_sids, nom_res=nom_res, group=resolution_name) # Should have no fill_value elements
 
         cover_all = numpy.concatenate(cover_all)
         cover_all = staremaster.conversions.merge_stare(cover_all, n_workers=n_workers)
