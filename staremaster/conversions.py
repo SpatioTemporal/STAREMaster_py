@@ -9,7 +9,9 @@ import multiprocessing
 # import multiprocessing.popen_spawn_posix
 
 
-def latlon2stare_dask(lats, lons, resolution=None, n_workers=1, adapt_resolution=True):
+def latlon2stare_dask(lats, lons, resolution=None, n_workers=1, adapt_resolution=True,
+                      fill_value_in=None, fill_value_out=None
+                      ):
     # should probably make chunk size dependent on the number of workers and lat/lon dimensions
     if resolution:
         adapt_resolution = False
@@ -22,16 +24,25 @@ def latlon2stare_dask(lats, lons, resolution=None, n_workers=1, adapt_resolution
                                   lon_x,
                                   dask='parallelized',
                                   kwargs={'adapt_level': adapt_resolution,
-                                          'level': resolution},
+                                          'level': resolution,
+                                          'fill_value_in': fill_value_in,
+                                          'fill_value_out': fill_value_out
+                                          },
                                   output_dtypes=[numpy.int64])
         return numpy.array(sids)
 
 
-def latlon2stare(lats, lons, resolution=None, n_workers=1, adapt_resolution=True):
+def latlon2stare(lats, lons, resolution=None, n_workers=1, adapt_resolution=True,
+                 fill_value_in=None, fill_value_out=None
+                 ):
     if n_workers > 1:
-        sids = latlon2stare_dask(lats, lons, resolution, n_workers, adapt_resolution)
+        sids = latlon2stare_dask(lats, lons, resolution, n_workers, adapt_resolution,
+                                 fill_value_in=fill_value_in,
+                                 fill_value_out=fill_value_out)
     else:
-        sids = pystare.from_latlon_2d(lats, lons, resolution, adapt_resolution)
+        sids = pystare.from_latlon_2d(lats, lons, resolution, adapt_resolution,
+                                 fill_value_in=fill_value_in,
+                                 fill_value_out=fill_value_out)
     return sids
 
 

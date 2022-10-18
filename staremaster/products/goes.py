@@ -62,7 +62,8 @@ class GOES:
         self.lats = {}
         self.lons = {}
         self.mask = {}
-        self.fill_value = -9999
+        self.fill_value_in  = -9999
+        self.fill_value_out = -998
 
     def load(self):
         self.get_latlon()
@@ -76,27 +77,31 @@ class GOES:
 
         lats,lons = calculate_degrees(self.netcdf)
 
-        # Pixels outside the globe as self.fill_value (default -9999)
-        mask = (lons == lons[0][0])
-        
-        # not_mask = ~mask
-        lons[mask] = self.fill_value
-        lats[mask] = self.fill_value
+        # Pixels off of the Earth
+        mask = numpy.isnan(lons)
+        lons[mask] = self.fill_value_in
+        lats[mask] = self.fill_value_in
 
-        ny  = lons.shape[0]
-        nx  = lons.shape[1]
-        nxo2 = int(nx/2)
-        idx = numpy.full([nx],False)
-        for j in range(ny):
-            idx  = ~mask[j,:]
-            
-            idx0 = idx.copy(); idx0[nxo2:nx] = False
-            lons[j,idx0] = numpy.amin(lons[j,idx])
-            lats[j,idx0] = numpy.amin(lats[j,idx])
-            
-            idx1 = idx.copy(); idx1[0:nxo2]   = False
-            lons[j,idx1] = numpy.amax(lons[j,idx])
-            lats[j,idx1] = numpy.amax(lats[j,idx])
+        # # Set to a fill value
+        # # not_mask = ~mask
+        # lons[mask] = self.fill_value
+        # lats[mask] = self.fill_value
+        # 
+        # # Extend the edge id value to the edge of the array
+        # ny  = lons.shape[0]
+        # nx  = lons.shape[1]
+        # nxo2 = int(nx/2)
+        # idx = numpy.full([nx],False)
+        # for j in range(ny):
+        #     idx  = ~mask[j,:]
+        #     
+        #     idx0 = idx.copy(); idx0[nxo2:nx] = False
+        #     lons[j,idx0] = numpy.amin(lons[j,idx])
+        #     lats[j,idx0] = numpy.amin(lats[j,idx])
+        #     
+        #     idx1 = idx.copy(); idx1[0:nxo2]   = False
+        #     lons[j,idx1] = numpy.amax(lons[j,idx])
+        #     lats[j,idx1] = numpy.amax(lats[j,idx])
 
         resolution_name = self.netcdf.spatial_resolution.replace(' ','_')
         self.lons[resolution_name] = lons
@@ -117,11 +122,23 @@ class GOES:
             # The following does not handle masked data or with weird fill values.
             # sids = staremaster.conversions.latlon2stare(lats, lons, n_workers=n_workers)
             
-            sids = numpy.full(lats.shape,self.fill_value,dtype=numpy.int64)
-            
+            sids = staremaster.conversions.latlon2stare(lats, lons, n_workers=n_workers,
+                                                        fill_value_in  = self.fill_value_in,
+                                                        fill_value_out = int(self.fill_value_out)
+                                                        )
+
             not_mask = ~self.mask[resolution_name]
-            
-            sids[not_mask] = pystare.from_latlon(lats[not_mask],lons[not_mask],level=27)
+
+            # sids = numpy.full(lats.shape,self.fill_value,dtype=numpy.int64)
+            # # Nope: sids[not_mask] = pystare.from_latlon(lats[not_mask],lons[not_mask],level=27)
+            # 
+            # # Too slow by a lot
+            # for ix in range(sids.shape[1]):
+            #     sids[not_mask[:,ix]] = staremaster.conversions.latlon2stare(
+            #         lats[not_mask[:,ix]],
+            #         lons[not_mask[:,ix]],
+            #         n_workers=n_workers
+            #         )
 
             if not cover_res:
                 # Need to drop the resolution to make the cover less sparse
@@ -130,8 +147,8 @@ class GOES:
                 if cover_res < 0:
                     cover_res = 0
 
-            # sids_adapted = pystare.spatial_coerce_resolution(sids[not_mask], cover_res)
-            sids_adapted = pystare.spatial_coerce_resolution(sids, cover_res)
+            sids_adapted = pystare.spatial_coerce_resolution(sids[not_mask], cover_res)
+            # sids_adapted = pystare.spatial_coerce_resolution(sids, cover_res)
 
             cover_sids = staremaster.conversions.merge_stare(sids_adapted, n_workers=n_workers)
 
@@ -141,7 +158,7 @@ class GOES:
             j = lats.shape[1]
             l = cover_sids.size
 
-            sids[self.mask[resolution_name]]=self.fill_value
+            sids[self.mask[resolution_name]]=self.fill_value_out
 
             nom_res = None
 
