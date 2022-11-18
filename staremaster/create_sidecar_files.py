@@ -46,6 +46,8 @@ def create_sidecar(file_path, n_workers, product, cover_res, out_path, archive):
         granule = staremaster.products.SSMIS(file_path)
     elif product == 'ATMS':
         granule = staremaster.products.ATMS(file_path)
+    elif product == 'GOES_ABI_FIXED_GRID':
+        granule = staremaster.products.GOES_ABI_FIXED_GRID(file_path)
     else:
         print('product not supported')
         print('supported products are {}'.format(get_installed_products()))
