@@ -31,7 +31,7 @@ class XCAL:
         for scan in self.scans:
             lons = self.lons[scan]
             lats = self.lats[scan]
-            sids = staremaster.conversions.latlon2stare(lats, lons, n_workers)
+            sids = staremaster.conversions.latlon2stare(lats, lons, n_workers=n_workers)
 
             if not cover_res:
                 # Need to drop the resolution to make the cover less sparse
