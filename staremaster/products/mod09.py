@@ -49,15 +49,15 @@ class MOD09(HDFeos):
             lat_500_g = scipy.ndimage.zoom(group_lats, (19 / 10, 2707 / 1354), order=1)
             lon_500_g = scipy.ndimage.zoom(group_lons, (19 / 10, 2707 / 1354), order=1)
 
-            # 1. Calculate the gradient to
+            # 1. Calculate the gradient
             # 2. shift 0.5 lengths (250 m) in track direction
             # 3. It is not obvious, but possibly also by 1 length (500 m) in scan direction.
-            # This really depends on whether or not there is a timing offset for the first frame.
+            # This really depends on whether there is a timing offset for the first frame.
             # 4. Extrapolate the last observation in track direction
             # 5) Extrapolate the last observation in scan direction
 
-            # First/x-axis is track
-            # Second/y-axis is scan
+            # First/x-axis is along-rack
+            # Second/y-axis is along-scan
 
             gxx_lat, gyy_lat = numpy.gradient(lat_500_g)
             # lat_500_g = lat_500_g - 0.5 * gxx_lat - 1 * gyy_lat

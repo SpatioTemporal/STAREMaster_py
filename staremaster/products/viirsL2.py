@@ -2,13 +2,14 @@ import netCDF4
 import numpy
 from staremaster.sidecar import Sidecar
 import staremaster.conversions
+import glob
 
 
-class L2_VIIRS:
-    
+class L2VIIRS:
+
     def __init__(self, file_path):
         self.file_path = file_path
-        self.netcdf = netCDF4.Dataset(file_path, 'r', format='NETCDF4')        
+        self.netcdf = netCDF4.Dataset(file_path, 'r', format='NETCDF4')
         self.lats = None
         self.lons = None
         self.gring_lats = None
@@ -21,8 +22,8 @@ class L2_VIIRS:
     def read_latlon(self):
         self.lats = self.netcdf.groups['geolocation_data']['latitude'][:].data.astype(numpy.double)
         self.lons = self.netcdf.groups['geolocation_data']['longitude'][:].data.astype(numpy.double)
-        
-    def read_gring(self):        
+
+    def read_gring(self):
         self.gring_lats = self.netcdf.GRingPointLatitude[::-1]
         self.gring_lons = self.netcdf.GRingPointLongitude[::-1]
 
@@ -36,7 +37,7 @@ class L2_VIIRS:
                                                     resolution=None,
                                                     n_workers=n_workers,
                                                     adapt_resolution=True)
-        
+
         if not cover_res:
             cover_res = staremaster.conversions.min_resolution(sids)
         cover_sids = self.get_cover_sids(cover_res)
@@ -44,11 +45,62 @@ class L2_VIIRS:
         i = self.lats.shape[0]
         j = self.lats.shape[1]
         l = cover_sids.size
-        
+
         sidecar = Sidecar(self.file_path, out_path)
-        sidecar.write_dimensions(i, j, l, nom_res=self.nom_res)    
+        sidecar.write_dimensions(i, j, l, nom_res=self.nom_res)
         sidecar.write_lons(self.lons, nom_res=self.nom_res)
         sidecar.write_lats(self.lats, nom_res=self.nom_res)
         sidecar.write_sids(sids, nom_res=self.nom_res)
         sidecar.write_cover(cover_sids, nom_res=self.nom_res)
         return sidecar
+
+
+class VNP03MOD(L2VIIRS):
+    """ Also good for
+        - VNP03DNB
+        - VJ103MOD
+        - VJ103DNB
+    """
+
+    def __init__(self, file_path):
+        super(VNP03MOD, self).__init__(file_path)
+        self.nom_res = '750m'
+
+
+class VNP03IMG(L2VIIRS):
+    """ Also good for
+        - VJ103IMG
+    """
+    def __init__(self, file_path):
+        super(VNP03MOD, self).__init__(file_path)
+        self.nom_res = '375m'
+
+
+class CLMDKS_L2_VIIRS(L2VIIRS):
+
+    def __init__(self, file_path):
+        super(CLMDKS_L2_VIIRS, self).__init__(file_path)
+        self.nom_res = '750m'
+
+
+# The following are classes to get sidecars from the data granules rather than from the geolocation granules
+# Comes in handy for lazy users
+
+class VNP02MOD(L2VIIRS):
+    """ Also good for
+        - VNP02DNB
+        - VJ102MOD
+        - VJ102DNB
+    """
+
+    def __init__(self, file_path):
+        super(VNP02MOD, self).__init__(file_path)
+        companion_path = self.guess_companion_path()
+        self.netcdf = netCDF4.Dataset(companion_path, 'r', format='NETCDF4')
+        self.nom_res = '750m'
+
+    def guess_companion_path(self):
+        name_trunk = self.file_path.split('.')[0:-2]
+        pattern = '.'.join(name_trunk).replace('02DNB', '03DNB') + '*[!_stare].nc'
+        companion_path = glob.glob(pattern)[0]
+        return companion_path
