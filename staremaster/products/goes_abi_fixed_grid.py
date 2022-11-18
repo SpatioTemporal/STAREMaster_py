@@ -4,7 +4,6 @@ from staremaster.sidecar import Sidecar
 import staremaster.conversions
 import pystare
 
-from pyproj import Proj
 
 # From: https://www.star.nesdis.noaa.gov/atmospheric-composition-training/python_abi_lat_lon.php
 """
