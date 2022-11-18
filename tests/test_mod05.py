@@ -7,7 +7,7 @@ import numpy
 
 def test_make_sidecar():
     # Let's just verify this does not crash        
-    file_path = 'tests/data/mod05/MOD05_L2.A2022308.1940.061.2022309104022.hdf'
+    file_path = 'tests/data/mod05/MOD05_L2.A2005349.2125.061.2017294065400.hdf'
     granule = staremaster.products.mod05.MOD05(file_path)
     granule.read_latlon()
     granule.read_gring()

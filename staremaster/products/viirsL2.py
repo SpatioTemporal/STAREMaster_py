@@ -72,7 +72,7 @@ class VNP03IMG(L2VIIRS):
         - VJ103IMG
     """
     def __init__(self, file_path):
-        super(VNP03MOD, self).__init__(file_path)
+        super(VNP03IMG, self).__init__(file_path)
         self.nom_res = '375m'
 
 
