@@ -1,6 +1,6 @@
 from staremaster.products.mod05 import MOD05
 from staremaster.products.mod09 import MOD09
-from staremaster.products.viirsL2 import VNP03MOD, VNP02MOD, CLMDKS_L2_VIIRS, VNP03IMG
+from staremaster.products.viirsL2 import VNP03MOD, CLMDKS_L2_VIIRS, VNP03IMG
 from staremaster.products.ssmis import SSMIS
 from staremaster.products.atms import ATMS
 from staremaster.products.amsr import AMSR

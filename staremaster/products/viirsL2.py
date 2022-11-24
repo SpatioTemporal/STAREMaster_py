@@ -82,25 +82,3 @@ class CLMDKS_L2_VIIRS(L2VIIRS):
         super(CLMDKS_L2_VIIRS, self).__init__(file_path)
         self.nom_res = '750m'
 
-
-# The following are classes to get sidecars from the data granules rather than from the geolocation granules
-# Comes in handy for lazy users
-
-class VNP02MOD(L2VIIRS):
-    """ Also good for
-        - VNP02DNB
-        - VJ102MOD
-        - VJ102DNB
-    """
-
-    def __init__(self, file_path):
-        super(VNP02MOD, self).__init__(file_path)
-        companion_path = self.guess_companion_path()
-        self.netcdf = netCDF4.Dataset(companion_path, 'r', format='NETCDF4')
-        self.nom_res = '750m'
-
-    def guess_companion_path(self):
-        name_trunk = self.file_path.split('.')[0:-2]
-        pattern = '.'.join(name_trunk).replace('02DNB', '03DNB') + '*[!_stare].nc'
-        companion_path = glob.glob(pattern)[0]
-        return companion_path

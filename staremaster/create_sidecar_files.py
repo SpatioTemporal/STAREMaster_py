@@ -34,8 +34,6 @@ def create_sidecar(file_path, n_workers, product, cover_res, out_path, archive):
         granule = staremaster.products.MOD05(file_path)
     elif product == 'MOD09':
         granule = staremaster.products.MOD09(file_path)
-    elif product in ('VNP02MOD', 'VJ102MOD', 'VNP02DNB', 'VJ102DNB'):
-        granule = staremaster.products.VNP02MOD(file_path)
     elif product in ('VNP03MOD', 'VNP03DNB', 'VJ103MOD', 'VJ103DNB'):
         granule = staremaster.products.VNP03MOD(file_path)
     elif product in ('VNP03IMG', 'VJ103IMG'):
@@ -65,7 +63,6 @@ def create_sidecar(file_path, n_workers, product, cover_res, out_path, archive):
 def list_granules(folder, product):
     if not product:
         product = ''
-
     files = glob.glob(folder + '/*')
     pattern = '.*{product}.*[^_stare]\.(nc|hdf|HDF5)'.format(product=product.upper())
     granules = list(filter(re.compile(pattern).match, files))
