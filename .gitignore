@@ -8,5 +8,5 @@ dist/*
 *.dirlock
 *.lock
 *.egg-info/
+.idea/
 *~
-

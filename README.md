@@ -90,5 +90,3 @@ To add support for additional products, we need the following:
     * a method that implements the write_sidecar() function
 2. an import of the new module in products/\_\_init\_\_.py
 3. argument parsing and switch for the added product in create_sidecar_files.py
-
-

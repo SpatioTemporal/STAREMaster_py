@@ -26,7 +26,7 @@ def create_grid_sidecar(grid, out_path, n_workers):
 def create_sidecar(file_path, n_workers, product, cover_res, out_path, archive):
     print(f'creating sidecar for {file_path}')
     if product is None:
-        product = guess_product(file_path)
+        product = product_name(file_path)
 
     product = product.upper()
 
@@ -34,15 +34,11 @@ def create_sidecar(file_path, n_workers, product, cover_res, out_path, archive):
         granule = staremaster.products.MOD05(file_path)
     elif product == 'MOD09':
         granule = staremaster.products.MOD09(file_path)
-    elif product == 'VNP02DNB':
-        granule = staremaster.products.VNP02DNB(file_path)
-    elif product == 'VNP03':
-        granule = staremaster.products.VNP03(file_path)
-    elif product == 'VJ102DNB':
-        granule = staremaster.products.VJ102DNB(file_path)
-    elif product == 'VJ103DNB':
-        granule = staremaster.products.VJ103DNB(file_path)
-    elif product == 'CLDMSK_L2_VIIRS':
+    elif product in ('VNP03MOD', 'VNP03DNB', 'VJ103MOD', 'VJ103DNB'):
+        granule = staremaster.products.VNP03MOD(file_path)
+    elif product in ('VNP03IMG', 'VJ103IMG'):
+        granule = staremaster.products.VNP03IMG(file_path)
+    elif product in ('CLDMSK_L2_VIIRS_NOAA20', 'CLDMSK_L2_SNPP'):
         granule = staremaster.products.CLMDKS_L2_VIIRS(file_path)
     elif product == 'SSMIS':
         granule = staremaster.products.SSMIS(file_path)
@@ -67,34 +63,16 @@ def create_sidecar(file_path, n_workers, product, cover_res, out_path, archive):
 def list_granules(folder, product):
     if not product:
         product = ''
-
     files = glob.glob(folder + '/*')
     pattern = '.*{product}.*[^_stare]\.(nc|hdf|HDF5)'.format(product=product.upper())
     granules = list(filter(re.compile(pattern).match, files))
     return granules
 
 
-def guess_product(file_path):
+def product_name(file_path):
     file_name = file_path.split('/')[-1]
-    if 'MOD05_L2' in file_path and '.hdf' in file_name:
-        product = 'MOD05'
-    elif 'MOD09' in file_path and '.hdf' in file_name:
-        product = 'MOD09'
-    elif ('VNP03' in file_path or 'VJ103' in file_path) and '.nc' in file_name:
-        product = 'VNP03'
-    elif ('VNP02DNB' in file_path or 'VJ102DNB' in file_path) and '.nc' in file_name:
-        product = 'VNP02DNB'
-    elif 'CLDMSK_L2_VIIRS' in file_path and '.nc' in file_name:
-        product = 'CLDMSK_L2_VIIRS'
-    elif 'SSMIS' in file_path and '.HDF5' in file_name:
-        product = 'SSMIS'
-    elif 'ATMS' in file_path and '.HDF5' in file_name:
-        product = 'ATMS'
-    else:
-        product = None
-        print('could not determine product for {}'.format(file_path))
-        quit()
-    return product
+    product_name = file_name.split('.')[0]
+    return product_name
 
 
 def remove_archived(file_paths, archive):
@@ -122,6 +100,7 @@ def get_installed_products():
 def main():
     installed_products = get_installed_products()
     parser = argparse.ArgumentParser(description='Creates Sidecar Files')
+    parser.add_argument('--version', action='version', version=staremaster.__version__)
     parser.add_argument('--folder', metavar='folder', type=str,
                         help='the folder to create sidecars for')
     parser.add_argument('--files', metavar='files', nargs='+', type=str,
@@ -132,7 +111,7 @@ def main():
                         help='the folder to create sidecars in; default: next to granule')
     parser.add_argument('--product', metavar='product', type=str,
                         help='product (e.g. cldmsk_l2_viirs, hdfeos, l2_viirs, mod05, mod09, vj102dnb, '
-                             'vj103dnb, vnp02dnb, vnp03, ssmi)',
+                             'vj103dnb, vnp02dnb, vnp03mod, ssmi)',
                         choices=installed_products, default=None)
     parser.add_argument('--cover_res', metavar='cover_res', type=int,
                         help='max STARE resolution of the cover. Default: min resolution of iFOVs')
