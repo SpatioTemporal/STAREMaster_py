@@ -13,8 +13,9 @@ class IMERG:
         self.lons = None
         self.nom_res = ''
         self.sids = []
+        self.make_latlon()
         
-    def get_latlon(self):
+    def make_latlon(self):
         self.lats = numpy.ascontiguousarray(numpy.tile(numpy.arange(-89.95, 90, 0.1), (3600, 1)).transpose())
         self.lons = numpy.tile(numpy.arange(-179.95, 180, 0.1), (1800, 1))
 
@@ -42,7 +43,7 @@ class IMERG:
             self.make_sids()
         return self.sids
 
-    def create_sidecar(self, out_path):
+    def create_sidecar(self, out_path, n_workers):
         sids = self.get_sids()
         cover_sids = self.get_cover_sids()
         
