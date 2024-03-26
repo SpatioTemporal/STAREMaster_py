@@ -17,6 +17,9 @@ def create_grid_sidecar(grid, out_path, n_workers):
         granule = staremaster.products.IMERG()
     elif grid[0] == 'h' and grid[3] == 'v':
         granule = staremaster.products.ModisTile(grid)
+    elif grid == 'snodas':
+        granule = staremaster.products.SNODAS()
+        granule.load()
     else:
         print('unknown grid')
         exit()
@@ -46,6 +49,8 @@ def create_sidecar(file_path, n_workers, product, cover_res, out_path, archive):
         granule = staremaster.products.ATMS(file_path)
     elif product == 'GOES_ABI_FIXED_GRID':
         granule = staremaster.products.GOES_ABI_FIXED_GRID(file_path)
+    elif product == 'SNODAS':
+        granule = staremaster.products.SNODAS(file_path)
     else:
         print('product not supported')
         print('supported products are {}'.format(get_installed_products()))
