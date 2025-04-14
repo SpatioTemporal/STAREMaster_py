@@ -75,10 +75,6 @@ def list_granules(folder, product):
 
 def product_name(file_path):
     file_name = file_path.split('/')[-1]
-<<<<<<< Updated upstream
-    product_name = file_name.split('.')[0]
-    return product_name
-=======
     if 'MOD05_L2' in file_path and '.hdf' in file_name:
         product = 'MOD05'
     elif 'MOD09' in file_path and '.hdf' in file_name:
@@ -100,7 +96,6 @@ def product_name(file_path):
         print('could not determine product for {}'.format(file_path))
         quit()
     return product
->>>>>>> Stashed changes
 
 
 def remove_archived(file_paths, archive):
