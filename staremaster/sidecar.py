@@ -93,7 +93,7 @@ class Sidecar:
             lats_netcdf.units = 'degrees_north'
             lats_netcdf[:, :] = lats            
         
-    def write_sids(self, sids, nom_res=None, group=None, fill_value=-1):
+    def write_sids(self, sids, nom_res=None, group=None, fill_value=None):
         i = sids.shape[0]
         j = sids.shape[1]
         varname = 'STARE_index'.format(nom_res=nom_res)
@@ -107,8 +107,8 @@ class Sidecar:
             if group:
                 grp = rootgrp.createGroup(group)
             else:
-                grp = rootgrp    
-            sids_netcdf = grp.createVariable(varname=varname, 
+                grp = rootgrp
+            sids_netcdf = grp.createVariable(varname=varname,
                                              datatype='u8', 
                                              dimensions=(i_name, j_name),
                                              chunksizes=[i, j],

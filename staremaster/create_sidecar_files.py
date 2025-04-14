@@ -11,7 +11,7 @@ import importlib
 import re
 
 
-def create_grid_sidecar(grid, out_path, n_workers):
+def create_grid_sidecar(grid, out_path, n_workers, for_mcms):
     grid = grid.lower()
     if grid == 'imerg':
         granule = staremaster.products.IMERG()
@@ -19,6 +19,9 @@ def create_grid_sidecar(grid, out_path, n_workers):
         granule = staremaster.products.ModisTile(grid)
     elif grid == 'snodas':
         granule = staremaster.products.SNODAS()
+        granule.load()
+    elif grid == 'merra2':
+        granule = staremaster.products.MERRA2(for_mcms)
         granule.load()
     else:
         print('unknown grid')
@@ -51,6 +54,8 @@ def create_sidecar(file_path, n_workers, product, cover_res, out_path, archive):
         granule = staremaster.products.GOES_ABI_FIXED_GRID(file_path)
     elif product == 'SNODAS':
         granule = staremaster.products.SNODAS(file_path)
+    elif product == 'MERRA2':
+        granule = staremaster.products.MERRA2(file_path)
     else:
         print('product not supported')
         print('supported products are {}'.format(get_installed_products()))
@@ -69,7 +74,7 @@ def list_granules(folder, product):
     if not product:
         product = ''
     files = glob.glob(folder + '/*')
-    pattern = '.*{product}.*[^_stare]\.(nc|hdf|HDF5)'.format(product=product.upper())
+    pattern = '.*{product}.*[^_stare]\.(nc4|nc|hdf|HDF5)'.format(product=product.upper())
     granules = list(filter(re.compile(pattern).match, files))
     return granules
 
@@ -127,6 +132,8 @@ def main():
                             Record all create sidecars and their corresponding granules in it.''')
     parser.add_argument('--parallel_files', dest='parallel_files', action='store_true',
                         help='Process files in parallel rather than looking up SIDs in parallel')
+    parser.add_argument('--as_mcms', metavar='as_mcms', type=int,
+                        help='MCMS specific layout for MERRA2 grid', default=0)
 
     parser.set_defaults(archive=False)
     parser.set_defaults(parallel_files=False)
@@ -138,7 +145,7 @@ def main():
     elif args.folder:
         file_paths = list_granules(args.folder, product=args.product)
     elif args.grid:
-        create_grid_sidecar(args.grid, args.out_path, n_workers=args.workers)
+        create_grid_sidecar(args.grid, args.out_path, n_workers=args.workers, for_mcms=args.as_mcms)
         quit()
     else:
         print('Wrong usage; need to specify a folder, file, or grid\n')

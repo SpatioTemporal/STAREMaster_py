@@ -1406,6 +1406,23 @@ class SNODAS:
         self.lats = np.ascontiguousarray(np.tile(snodas_lats, (nlon, 1)).transpose())
         self.lons = np.tile(snodas_lons, (nlat, 1))
 
+        ##
+        # Trim for SNODAS west, which unlike full SNODAS works.
+        snodas_lons_1d = self.lons[0, :]
+        snodas_lats_1d = self.lats[:, 0]
+
+        snodas_w_cutoff = min((lidx for lidx, lat in enumerate(snodas_lats_1d) if lat >= 30.0))
+        snodas_w_lats = snodas_lats_1d[snodas_w_cutoff:]
+
+        snodas_w_cutoff = max((lidx for lidx, lon in enumerate(snodas_lons_1d) if lon <= -110))
+        snodas_w_lons = snodas_lons_1d[:snodas_w_cutoff]
+
+        snodas_lons = self.lons[snodas_w_cutoff:, :snodas_w_cutoff]
+        snodas_lats = self.lats[snodas_w_cutoff:, :snodas_w_cutoff]
+
+        self.lons = snodas_lons
+        self.lats = snodas_lats
+
         # print("\nget_latlon():")
         # print(f"\tlats {self.lats.shape}:")
         # print(f"\t\tMin: {np.amin(self.lats):+.1f}")
@@ -1439,7 +1456,9 @@ class SNODAS:
         Gives same result as staremaster.conversions.latlon2stare()
         """
         # print("\tmake_sids():")
-        self.sids = pystare.from_latlon_2d(self.lats, self.lons, adapt_level=True)
+        # self.sids = pystare.from_latlon_2d(self.lats, self.lons, adapt_level=True)
+        # 1-km spatial resolution
+        self.sids = pystare.from_latlon_2d(self.lats, self.lons, level=15, adapt_level=False)
         r"""
         make_sids():
             sids_adapted.shape = (3351, 6935)
@@ -1460,7 +1479,7 @@ class SNODAS:
             | 18      |~31 m     | ~38 m      |
             | 17      |~61 m     | ~77 m      |
             | 16      |~122 m    | ~153 m     |
-            | 15      |~245 m    | ~307 m     |
+            | 15      |~245 m    | ~307 m     | <= sids_res
             | 14      |~490 m    | ~615 m     |
             | 13      |~1 km     | ~1.2 km    |
             | 12      |~2 km     | ~2 km      |
@@ -1468,7 +1487,7 @@ class SNODAS:
             | 10      | ~8 km    | ~10 km     |
             | 09      | ~16 km   | ~20 km     |
             | 08      | ~31 km   | ~39 km     |
-            | 07      | ~63 km   | ~78 km     | <= sids_res
+            | 07      | ~63 km   | ~78 km     |
             | 06      | ~125 km  | ~157 km    |
             | 05      | ~251 km  | ~314 km    |
             | 04      | ~501 km  | ~628 km    |
@@ -1556,7 +1575,7 @@ class SNODAS:
         | 18      |~31 m     | ~38 m      |
         | 17      |~61 m     | ~77 m      |
         | 16      |~122 m    | ~153 m     |
-        | 15      |~245 m    | ~307 m     |
+        | 15      |~245 m    | ~307 m     | <= sids_res
         | 14      |~490 m    | ~615 m     |
         | 13      |~1 km     | ~1.2 km    |
         | 12      |~2 km     | ~2 km      |
@@ -1564,7 +1583,7 @@ class SNODAS:
         | 10      | ~8 km    | ~10 km     |
         | 09      | ~16 km   | ~20 km     |
         | 08      | ~31 km   | ~39 km     |
-        | 07      | ~63 km   | ~78 km     | <= sids_res
+        | 07      | ~63 km   | ~78 km     |
         | 06      | ~125 km  | ~157 km    |
         | 05      | ~251 km  | ~314 km    | <= cover_res
         | 04      | ~501 km  | ~628 km    |
@@ -1574,15 +1593,6 @@ class SNODAS:
         | 00      | ~8021 km | ~10,000 km |
         [Table 1. Approximate uncertainties in terms of the area
                   (radius (R)) and the edge length (L) of the trixel by Q-level.]
-
-        sids_adapted.shape  = (361, 576)
-        type(sids_adapted)  = <class 'numpy.ndarray'> type(sids_adapted[0, 0]) = <class 'numpy.int64'>
-        sids_adapted[0, 0]  = 2287822013634445285
-        cf. self.sids[0, 0] = 2287822013634445311
-
-        self.cover_sids.shape = (8,)
-        type(self.cover_sids) = <class 'numpy.ndarray'> type(self.cover_sids[0]) = <class 'numpy.int64'>
-        self.cover_sids       = [0  576460752303423488 1152921504606846976 1729382256910270464 2305843009213693952 2882303761517117440 3458764513820540928 4035225266123964416]
         """
         # print(f"get_cover({out_path = }):")
         pickle_name = f"{out_path}snodas_cover_sids.pkl"
