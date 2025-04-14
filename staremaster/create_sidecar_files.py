@@ -70,6 +70,7 @@ def list_granules(folder, product):
 
 
 def product_name(file_path):
+    file_name = file_path.split('/')[-1]
     if 'MOD05_L2' in file_path and '.hdf' in file_name:
         product = 'MOD05'
     elif 'MOD09' in file_path and '.hdf' in file_name:
