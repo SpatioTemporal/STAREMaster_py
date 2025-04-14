@@ -11,19 +11,17 @@ import importlib
 import re
 
 
-def create_grid_sidecar(grid, out_path, n_workers, for_mcms):
+def create_grid_sidecar(grid, out_path, n_workers):
     grid = grid.lower()
     if grid == 'imerg':
         granule = staremaster.products.IMERG()
     elif grid[0] == 'h' and grid[3] == 'v':
         granule = staremaster.products.ModisTile(grid)
-    elif grid == 'merra2':
-        granule = staremaster.products.MERRA2(for_mcms)
-        granule.load()
     else:
         print('unknown grid')
         exit()
     granule.create_sidecar(out_path, n_workers=n_workers)
+
 
 def create_sidecar(file_path, n_workers, product, cover_res, out_path, archive):
     print(f'creating sidecar for {file_path}')
@@ -48,8 +46,6 @@ def create_sidecar(file_path, n_workers, product, cover_res, out_path, archive):
         granule = staremaster.products.ATMS(file_path)
     elif product == 'GOES_ABI_FIXED_GRID':
         granule = staremaster.products.GOES_ABI_FIXED_GRID(file_path)
-    elif product == 'MERRA2':
-        granule = staremaster.products.MERRA2(file_path)
     else:
         print('product not supported')
         print('supported products are {}'.format(get_installed_products()))
@@ -74,7 +70,6 @@ def list_granules(folder, product):
 
 
 def product_name(file_path):
-    file_name = file_path.split('/')[-1]
     if 'MOD05_L2' in file_path and '.hdf' in file_name:
         product = 'MOD05'
     elif 'MOD09' in file_path and '.hdf' in file_name:
@@ -145,8 +140,6 @@ def main():
                             Record all create sidecars and their corresponding granules in it.''')
     parser.add_argument('--parallel_files', dest='parallel_files', action='store_true',
                         help='Process files in parallel rather than looking up SIDs in parallel')
-    parser.add_argument('--as_mcms', metavar='as_mcms', type=int,
-                        help='MCMS specific layout for MERRA2 grid', default=0)
 
     parser.set_defaults(archive=False)
     parser.set_defaults(parallel_files=False)
@@ -158,7 +151,7 @@ def main():
     elif args.folder:
         file_paths = list_granules(args.folder, product=args.product)
     elif args.grid:
-        create_grid_sidecar(args.grid, args.out_path, n_workers=args.workers, for_mcms=args.as_mcms)
+        create_grid_sidecar(args.grid, args.out_path, n_workers=args.workers)
         quit()
     else:
         print('Wrong usage; need to specify a folder, file, or grid\n')
