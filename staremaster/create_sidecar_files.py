@@ -71,8 +71,27 @@ def list_granules(folder, product):
 
 def product_name(file_path):
     file_name = file_path.split('/')[-1]
-    product_name = file_name.split('.')[0]
-    return product_name
+    if 'MOD05_L2' in file_path and '.hdf' in file_name:
+        product = 'MOD05'
+    elif 'MOD09' in file_path and '.hdf' in file_name:
+        product = 'MOD09'
+    elif ('VNP03' in file_path or 'VJ103' in file_path) and '.nc' in file_name:
+        product = 'VNP03'
+    elif ('VNP02DNB' in file_path or 'VJ102DNB' in file_path) and '.nc' in file_name:
+        product = 'VNP02DNB'
+    elif 'CLDMSK_L2_VIIRS' in file_path and '.nc' in file_name:
+        product = 'CLDMSK_L2_VIIRS'
+    elif 'SSMIS' in file_path and '.HDF5' in file_name:
+        product = 'SSMIS'
+    elif 'ATMS' in file_path and '.HDF5' in file_name:
+        product = 'ATMS'
+    elif 'MERRA2' in file_path and '.nc4' in file_name:
+        product = 'MERRA2'
+    else:
+        product = None
+        print('could not determine product for {}'.format(file_path))
+        quit()
+    return product
 
 
 def remove_archived(file_paths, archive):
