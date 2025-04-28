@@ -10,15 +10,17 @@ import pandas
 
 def get_granule_paths(folder, granule_pattern):
     granule_paths = sorted(glob.glob(os.path.expanduser(folder) + '/' + '*' ))
-    pattern = '.*/{}.*[^_stare]\.(nc|hdf|HDF5)'.format(granule_pattern)
-    granule_paths = list(filter(re.compile(pattern).match, granule_paths))        
+    # pattern = '.*/{}.*[^_stare]\.(nc|hdf|HDF5)'.format(granule_pattern)
+    pattern = rf'.*/{granule_pattern}.*[^_stare]\.(nc|hdf|HDF5)'
+    granule_paths = list(filter(re.compile(pattern).match, granule_paths))
     return granule_paths
 
 
 def get_sidecar_paths(folder, granule_pattern):
     sidecar_paths = sorted(glob.glob(os.path.expanduser(folder) + '/' + '*' ))
-    pattern = '.*/{}.*_stare\.(nc|hdf|HDF5)'.format(granule_pattern)
-    sidecar_paths = list(filter(re.compile(pattern).match, sidecar_paths))       
+    # pattern = '.*/{}.*_stare\.(nc|hdf|HDF5)'.format(granule_pattern)
+    pattern = rf'.*/{granule_pattern}.*_stare\.(nc|hdf|HDF5)'
+    sidecar_paths = list(filter(re.compile(pattern).match, sidecar_paths))
     return sidecar_paths
 
 
