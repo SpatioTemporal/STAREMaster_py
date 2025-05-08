@@ -64,7 +64,7 @@ def list_granules(folder, product):
     if not product:
         product = ''
     files = glob.glob(folder + '/*')
-    pattern = '.*{product}.*[^_stare]\.(nc|hdf|HDF5)'.format(product=product.upper())
+    pattern = rf'.*{product}.*[^_stare]\.(nc|hdf|HDF5)'.format(product=product.upper())
     granules = list(filter(re.compile(pattern).match, files))
     return granules
 
