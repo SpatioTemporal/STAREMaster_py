@@ -128,7 +128,9 @@ class Sidecar:
                 grp = rootgrp.createGroup(group)
             else:
                 grp = rootgrp
-            grp.createDimension(l_name, l)
+            # Only create the 'l' dimension if it does not already exist
+            if l_name not in grp.dimensions:
+                grp.createDimension(l_name, l)
             cover_netcdf = grp.createVariable(varname=varname, 
                                               datatype='u8', 
                                               dimensions=(l_name),
