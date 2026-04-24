@@ -24,7 +24,7 @@ class XCAL:
         
         if file_ext in ['.nc', '.nc4', '.netcdf']:
             return 'netcdf4'
-        elif file_ext in ['.h5', '.hdf5', '.hdf']:
+        elif file_ext in ['.he5', '.h5', '.hdf5', '.hdf']:
             return 'hdf5'
         else:
             # Try to detect by attempting to open with each format
