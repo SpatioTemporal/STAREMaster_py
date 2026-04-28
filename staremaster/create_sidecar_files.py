@@ -11,7 +11,7 @@ import importlib
 import re
 
 
-def create_grid_sidecar(grid, out_path, n_workers, for_mcms):
+def create_grid_sidecar(grid, out_path, n_workers):
     grid = grid.lower()
     if grid == 'imerg':
         granule = staremaster.products.IMERG()
@@ -19,9 +19,6 @@ def create_grid_sidecar(grid, out_path, n_workers, for_mcms):
         granule = staremaster.products.ModisTile(grid)
     elif grid == 'snodas':
         granule = staremaster.products.SNODAS()
-        granule.load()
-    elif grid == 'merra2':
-        granule = staremaster.products.MERRA2(for_mcms)
         granule.load()
     else:
         print('unknown grid')
@@ -74,15 +71,36 @@ def list_granules(folder, product):
     if not product:
         product = ''
     files = glob.glob(folder + '/*')
-    pattern = '.*{product}.*[^_stare]\.(nc4|nc|hdf|HDF5)'.format(product=product.upper())
+    pattern = rf'.*{product}.*[^_stare]\.(nc4|nc|hdf|HDF5)'.format(product=product.upper())
     granules = list(filter(re.compile(pattern).match, files))
     return granules
 
 
 def product_name(file_path):
     file_name = file_path.split('/')[-1]
-    product_name = file_name.split('.')[0]
-    return product_name
+    if 'MOD05_L2' in file_path and '.hdf' in file_name:
+        product = 'MOD05'
+    elif 'MOD09' in file_path and '.hdf' in file_name:
+        product = 'MOD09'
+    elif ('VNP03' in file_path or 'VJ103' in file_path) and '.nc' in file_name:
+        product = 'VNP03'
+    elif ('VNP02DNB' in file_path or 'VJ102DNB' in file_path) and '.nc' in file_name:
+        product = 'VNP02DNB'
+    elif 'CLDMSK_L2_VIIRS' in file_path and '.nc' in file_name:
+        product = 'CLDMSK_L2_VIIRS'
+    elif 'SSMIS' in file_path and '.HDF5' in file_name:
+        product = 'SSMIS'
+    elif 'ATMS' in file_path and '.HDF5' in file_name:
+        product = 'ATMS'
+    elif 'MERRA2' in file_path and '.nc4' in file_name:
+        product = 'MERRA2'
+    elif 'SNODAS' in file_path:
+        product = 'SNODAS'
+    else:
+        product = None
+        print('could not determine product for {}'.format(file_path))
+        quit()
+    return product
 
 
 def remove_archived(file_paths, archive):
@@ -132,8 +150,6 @@ def main():
                             Record all create sidecars and their corresponding granules in it.''')
     parser.add_argument('--parallel_files', dest='parallel_files', action='store_true',
                         help='Process files in parallel rather than looking up SIDs in parallel')
-    parser.add_argument('--as_mcms', metavar='as_mcms', type=int,
-                        help='MCMS specific layout for MERRA2 grid', default=0)
 
     parser.set_defaults(archive=False)
     parser.set_defaults(parallel_files=False)
@@ -145,7 +161,7 @@ def main():
     elif args.folder:
         file_paths = list_granules(args.folder, product=args.product)
     elif args.grid:
-        create_grid_sidecar(args.grid, args.out_path, n_workers=args.workers, for_mcms=args.as_mcms)
+        create_grid_sidecar(args.grid, args.out_path, n_workers=args.workers)
         quit()
     else:
         print('Wrong usage; need to specify a folder, file, or grid\n')

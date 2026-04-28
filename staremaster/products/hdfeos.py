@@ -58,7 +58,7 @@ class HDFeos:
         for res in self.nom_res:
             sids = staremaster.conversions.latlon2stare(self.lats[res], self.lons[res],
                                                         resolution=None, n_workers=n_workers, adapt_resolution=True)
-            sids = numpy.ma.array(sids, mask=self.lats[res].mask, fill_value=-1)
+            sids = numpy.ma.array(sids, mask=self.lats[res].mask, fill_value=0)
             self.sids[res] = sids
             
     def get_cover_res_from_sids(self):

@@ -3,4 +3,3 @@ staremaster/_version.py export-subst
 *.nc filter=lfs diff=lfs merge=lfs -text
 *.hdf filter=lfs diff=lfs merge=lfs -text
 *.h5 filter=lfs diff=lfs merge=lfs -text
-*.TIF filter=lfs diff=lfs merge=lfs -text

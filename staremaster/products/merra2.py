@@ -213,6 +213,7 @@ class MERRA2:
     def load(self):
         self.get_latlon()
 
+
     ###########################################################################
     # PUBLIC Instance-Method: get_latlon()
     # ------------------------------------
@@ -292,6 +293,7 @@ class MERRA2:
         # print(f"\t\t[{self.lons[0, 0]:+.3f}, {self.lons[0, 1]:+.3f} ... {self.lons[0, -2]:+.3f}, {self.lons[0, -1]:+.3f}]")
         # print("\t\t[(0, 0), (0, 1) ... (0, -2), (0, -1)]")
 
+
     ###########################################################################
     # PUBLIC Instance-Method: make_sids()
     # -----------------------------------
@@ -312,10 +314,7 @@ class MERRA2:
 
         Gives same result as staremaster.conversions.latlon2stare()
         """
-        # Note:
-        #   in pystare -> if adapt_level: level = 27
-        # self.sids = pystare.from_latlon_2d(self.lats, self.lons, adapt_level=True)
-        self.sids = pystare.from_latlon_2d(self.lats, self.lons, level=10, adapt_level=False)
+        self.sids = pystare.from_latlon_2d(self.lats, self.lons, adapt_level=True)
         r"""
         make_sids(as_mcms = 1):
             self.sids.shape = (361, 576)
@@ -362,11 +361,12 @@ class MERRA2:
                       (radius (R)) and the edge length (L) of the trixel by Q-level.]
         """
         # print(f"\tmake_sids(as_mcms = {self.as_mcms}):")
-        sids_res = staremaster.conversions.min_resolution(self.sids)
+        # sids_res = staremaster.conversions.min_resolution(self.sids)
         # print(f"{self.sids.shape = }")
         # print(f"{type(self.sids) = } {type(self.sids[0, 0]) = }")
         # print(f"{self.sids[0, 0] = }")
         # print(f"{sids_res = }")
+
 
     ###########################################################################
     # PUBLIC Instance-Method: load_sids_pickle()
@@ -375,12 +375,14 @@ class MERRA2:
         with open(pickle_name, 'rb') as pickel_file:
             self.sids = pickle.load(pickel_file)
 
+
     ###########################################################################
     # PUBLIC Instance-Method: save_sids_pickle()
     # ------------------------------------------
     def save_sids_pickle(self, pickle_name):
         with open(pickle_name, 'wb') as pickel_file:
             pickle.dump(self.sids, pickel_file)
+
 
     ###########################################################################
     # PUBLIC Instance-Method: load_cover_pickle()
@@ -389,12 +391,14 @@ class MERRA2:
         with open(pickle_name, 'rb') as pickel_file:
             self.cover_sids = pickle.load(pickel_file)
 
+
     ###########################################################################
     # PUBLIC Instance-Method: save_cover_pickle()
     # ------------------------------------------
     def save_cover_pickle(self, pickle_name):
         with open(pickle_name, 'wb') as pickel_file:
             pickle.dump(self.cover_sids, pickel_file)
+
 
     ###########################################################################
     # PUBLIC Instance-Method: get_sids()
@@ -522,6 +526,7 @@ class MERRA2:
         # Find the STARE cover for self.sids
         self.get_cover(out_path)
 
+
         # # Third-Party Imports
         # import matplotlib as mpl
         # import matplotlib.pyplot as plt
@@ -589,8 +594,8 @@ class MERRA2:
         #     figax.ax.scatter([lon], [lat], s=1, c='r')
         #     return figax
 
-        # ##
-        # # Plot cover
+        ##
+        # Plot cover
         # hello_plot(self.cover_sids, plot_options=plot_options, set_global=False, set_coastlines=True)
 
         ##
@@ -610,8 +615,7 @@ class MERRA2:
         ##
         # Save Sidecar to file
         sidecar.write_dimensions(i, j, l)
-        # print(f"{self.sids = }")
-        sidecar.write_sids(self.sids, fill_value=0)
+        sidecar.write_sids(self.sids)
         sidecar.write_lons(self.lons)
         sidecar.write_lats(self.lats)
         sidecar.write_cover(self.cover_sids)
