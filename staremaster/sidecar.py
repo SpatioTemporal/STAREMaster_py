@@ -107,8 +107,8 @@ class Sidecar:
             if group:
                 grp = rootgrp.createGroup(group)
             else:
-                grp = rootgrp    
-            sids_netcdf = grp.createVariable(varname=varname, 
+                grp = rootgrp
+            sids_netcdf = grp.createVariable(varname=varname,
                                              datatype='u8', 
                                              dimensions=(i_name, j_name),
                                              chunksizes=[i, j],

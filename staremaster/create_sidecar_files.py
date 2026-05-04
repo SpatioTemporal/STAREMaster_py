@@ -17,6 +17,9 @@ def create_grid_sidecar(grid, out_path, n_workers):
         granule = staremaster.products.IMERG()
     elif grid[0] == 'h' and grid[3] == 'v':
         granule = staremaster.products.ModisTile(grid)
+    elif grid == 'snodas':
+        granule = staremaster.products.SNODAS()
+        granule.load()
     else:
         print('unknown grid')
         exit()
@@ -46,6 +49,10 @@ def create_sidecar(file_path, n_workers, product, cover_res, out_path, archive):
         granule = staremaster.products.ATMS(file_path)
     elif product == 'GOES_ABI_FIXED_GRID':
         granule = staremaster.products.GOES_ABI_FIXED_GRID(file_path)
+    elif product == 'SNODAS':
+        granule = staremaster.products.SNODAS(file_path)
+    elif product == 'MERRA2':
+        granule = staremaster.products.MERRA2(file_path)
     else:
         print('product not supported')
         print('supported products are {}'.format(get_installed_products()))
@@ -64,7 +71,7 @@ def list_granules(folder, product):
     if not product:
         product = ''
     files = glob.glob(folder + '/*')
-    pattern = rf'.*{product}.*[^_stare]\.(nc|hdf|HDF5)'.format(product=product.upper())
+    pattern = rf'.*{product}.*[^_stare]\.(nc4|nc|hdf|HDF5)'.format(product=product.upper())
     granules = list(filter(re.compile(pattern).match, files))
     return granules
 
@@ -87,6 +94,8 @@ def product_name(file_path):
         product = 'ATMS'
     elif 'MERRA2' in file_path and '.nc4' in file_name:
         product = 'MERRA2'
+    elif 'SNODAS' in file_path:
+        product = 'SNODAS'
     else:
         product = None
         print('could not determine product for {}'.format(file_path))

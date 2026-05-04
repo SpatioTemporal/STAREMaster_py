@@ -10,3 +10,4 @@ from staremaster.products.modis_tilegrid import ModisTile
 from staremaster.products.goes_abi_fixed_grid import GOES_ABI_FIXED_GRID
 from staremaster.products.merra2 import MERRA2
 from staremaster.products.amsr2 import AMSR2
+from staremaster.products.snodas import SNODAS
